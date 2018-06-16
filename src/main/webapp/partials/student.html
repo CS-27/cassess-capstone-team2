@@ -75,9 +75,11 @@
                     </div>
                     <div ng-if="isSet(3)">
                         <h3>GitHub Data</h3>
+                      
                         <br>
                         <br>
-                        <h3>GitHub Student Commit Activity</h3><br>
+                        <h3>GitHub Student Commit Activity:
+                           </h3><br>
                         <div ng-controller='StudentController'>
                             <nvd3 options='optionsForGitHubStudentCommits' data='dataForGitHubStudentCommits'></nvd3>
 

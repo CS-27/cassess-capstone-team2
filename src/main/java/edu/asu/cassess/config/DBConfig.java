@@ -41,9 +41,9 @@ public class DBConfig {
         dataSource.setPassword("root123");
 */
         //Connection Parameters for ASU RHEL Server Deployment
-        dataSource.setUrl("jdbc:mysql://cassess.fulton.asu.edu/cassess");
-        dataSource.setUsername("cassess");
-        dataSource.setPassword("4qHb!9d3");
+        dataSource.setUrl("jdbc:mysql://localhost/cassess");
+        dataSource.setUsername("root");
+        dataSource.setPassword("root123");
 /*
         dataSource.setUrl("jdbc:mysql://cassess.fulton.asu.edu/cassess");
         dataSource.setUsername("cassess");
@@ -55,7 +55,7 @@ public class DBConfig {
     @Bean(name = "entityManagerFactory")
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
-        emf.setDataSource(getDataSource());
+		emf.setDataSource(getDataSource());
         emf.setPackagesToScan(new String[]{"edu.asu.cassess.*"});
         JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         emf.setJpaVendorAdapter(vendorAdapter);

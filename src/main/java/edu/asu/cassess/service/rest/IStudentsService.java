@@ -2,6 +2,7 @@ package edu.asu.cassess.service.rest;
 
 import edu.asu.cassess.model.rest.CourseList;
 import edu.asu.cassess.model.Taiga.TeamNames;
+import edu.asu.cassess.model.github.PeriodicGithubActivity;
 import edu.asu.cassess.persist.entity.rest.Student;
 import edu.asu.cassess.persist.entity.rest.Team;
 import org.json.JSONObject;
@@ -46,4 +47,5 @@ public interface IStudentsService {
     List<CourseList> listGetCoursesForStudent(String email);
 
     List<TeamNames> listGetAssignedTeams(String email, String course);
-}
+
+	}

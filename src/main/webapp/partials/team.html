@@ -77,12 +77,14 @@
                         <br>
                         <br>
                         <h3>GitHub Team Average Commit Activity</h3><br>
+
                         <div ng-controller='TeamController'>
                             <nvd3 options='optionsForGitHubTeamCommits' data='dataForGitHubTeamCommits'></nvd3>
 
                             <h3>GitHub Team Average Weight Activity</h3><br>
                             <nvd3 options='optionsForGitHubTeamWeight' data='dataForGitHubTeamWeight'></nvd3>
-                        </div>
+
+                       </div>
                     </div>
                     <div ng-if="isSet(4)">
                         <h2>Slack Data</h2>

@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+
 public class GitHubAnalytics {
     public static double calculateWeight(int linesOfCodeAdded, int linesOfCodeDeleted){
         Date now = new Date();

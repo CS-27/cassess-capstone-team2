@@ -35,7 +35,6 @@ public class UserDetailsService implements org.springframework.security.core.use
         log.debug("Authenticating {}", login);
 
         BCryptPasswordEncoder passEncode = new BCryptPasswordEncoder(11);
-
         User user = userRepo.findByLogin(login);
         if (user == null) {
             throw new UsernameNotFoundException("User " + login + " was not found in the database");

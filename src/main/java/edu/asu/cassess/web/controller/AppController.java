@@ -10,6 +10,7 @@ import edu.asu.cassess.dao.taiga.IMemberQueryDao;
 import edu.asu.cassess.dao.taiga.IProjectQueryDao;
 import edu.asu.cassess.dao.taiga.ITaskTotalsQueryDao;
 import edu.asu.cassess.model.Taiga.*;
+import edu.asu.cassess.model.github.PeriodicGithubActivity;
 import edu.asu.cassess.model.rest.CourseList;
 import edu.asu.cassess.model.slack.DailyMessageTotals;
 import edu.asu.cassess.model.slack.WeeklyMessageTotals;
@@ -158,6 +159,15 @@ public class AppController {
         return new ResponseEntity<List<TeamNames>>(teamList, HttpStatus.OK);
     }
 
+    //Get the URL to the detailed Github Activity for a team
+    @RequestMapping(value = "/github/daily_activity", method = RequestMethod.GET)
+    public ResponseEntity<PeriodicGithubActivity> listGetDetailedGithubActivityURL(@RequestHeader(name = "course", required = true) String course,
+                                                                @RequestHeader(name = "team", required = true) String team,
+                                                                HttpServletRequest request, HttpServletResponse response) {
+        PeriodicGithubActivity weightList = teamService.listGetDetailedGithubActivityURL(course, team);
+        return new ResponseEntity<>(weightList, HttpStatus.OK);
+    }
+
     //Previous Query Based method to obtain Students assigned to a particular team/project
     @ResponseBody
     @RequestMapping(value = "/team_students", method = RequestMethod.GET)
@@ -202,6 +212,8 @@ public class AppController {
 
         return studentService.listReadSingleStudent(course, team, email);
     }
+
+
     //End of New Student Course and Project list methods
 
 
@@ -804,7 +816,6 @@ public class AppController {
         List<GitHubWeight> weightList = gitHubWeightQueryDao.getWeightsByStudent(course, team, email);
         return new ResponseEntity<List<GitHubWeight>>(weightList, HttpStatus.OK);
     }
-
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping(value = "/studentProfileDelTeam", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public

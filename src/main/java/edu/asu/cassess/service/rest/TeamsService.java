@@ -3,9 +3,11 @@ package edu.asu.cassess.service.rest;
 import edu.asu.cassess.dao.rest.TeamsServiceDao;
 import edu.asu.cassess.model.Taiga.Slugs;
 import edu.asu.cassess.model.Taiga.TeamNames;
+import edu.asu.cassess.model.github.PeriodicGithubActivity;
 import edu.asu.cassess.persist.entity.rest.Course;
 import edu.asu.cassess.persist.entity.rest.Team;
 import org.json.JSONObject;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import javax.ejb.EJB;
@@ -75,5 +77,10 @@ public class TeamsService implements ITeamsService {
     @Override
     public <T> Object deleteByCourse(Course course) {
         return teamsDao.deleteByCourse(course);
+    }
+
+    @Override
+    public PeriodicGithubActivity listGetDetailedGithubActivityURL(String course, String team) throws DataAccessException {
+        return teamsDao.listGetDetailedGithubActivityURL(course, team);
     }
 }
