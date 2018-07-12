@@ -36,6 +36,9 @@ public interface IGitHubCommitQueryDao {
     List<CommitData> getCommitsByCourse(String course) throws DataAccessException;
 
     @Transactional
+    List<CommitData> getCommitsByCourseWithinDate(String course, String beginDate, String endDate) throws DataAccessException;
+
+    @Transactional
     List<CommitData> getCommitsByTeam(String course, String team) throws DataAccessException;
 
     @Transactional

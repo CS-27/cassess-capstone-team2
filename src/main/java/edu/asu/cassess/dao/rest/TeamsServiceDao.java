@@ -261,6 +261,7 @@
                 owner=(String)item[2];
                 repo_id=(String)item[3];
             }
+            System.out.println("[LOG] "+userids);
             userids = userids.substring(0,userids.length()-3);
             PeriodicGithubActivity finalPOJO = new PeriodicGithubActivity(token,owner,repo_id,userids);
             finalPOJO.setGithub_activity_URL(token,owner,repo_id,userids);

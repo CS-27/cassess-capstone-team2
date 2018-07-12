@@ -74,6 +74,24 @@
                     </div>
                     <div ng-if="isSet(3)">
                         <h3>GitHub Data</h3>
+                        <label style="color: black">Select Week Beginning:</label>
+                        <select class="select_style"  ng-model="SelectedWeekBeginning" ng-options="x.weekBeginning for x in courseIntervals"
+                                ng-change="GithubIntervalChangedBegin(SelectedWeekBeginning.rawWeekBeginning)">
+                        </select>
+                        <br>
+                        <label style="color: black">Select Week Ending:</label>
+                        <select class="select_style"  ng-model="GithubSelectedWeekEnding" ng-options="x.weekEnding for x in courseIntervals"
+                                ng-change="GithubIntervalChangedEnd(GithubSelectedWeekEnding.rawWeekEnding)">
+                        </select>
+                        <br><br>
+                        <div ng-controller='CourseController'>
+                            <nvd3 options='optionsForGithubCourseTasks' data='dataForGithubCourseTasks'></nvd3>
+                        </div>
+
+                        <div afterRender='fireRefreshEventOnWindow()' ng-controller='CourseController'>
+                            <h3>Task Status Update Activity</h3><br>
+                            <nvd3 options='optionsForGithubCourseActivity' data='dataForGithubCourseActivity'></nvd3>
+                        </div>
                         <br>
                         <br>
                         <h3>GitHub Course Average Commit Activity</h3><br>

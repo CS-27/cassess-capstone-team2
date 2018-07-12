@@ -1191,8 +1191,210 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
             }, function (response) {
                 //fail case
                 console.log("didn't work");
-                getGitHubCommitsData();
+                getGithubCourseActivity();
             });
+        }
+        $scope.IntervalChangedBegin = function (rawWeekBeginning) {
+            $scope.rawWeekBeginning = rawWeekBeginning;
+            console.log("WeekBeginning: " + $scope.rawWeekBeginning);
+            if ($scope.rawWeekEnding != null) {
+                $http({
+                    url: './taiga/course_tasks',
+                    method: "GET",
+                    headers: {
+                        'course': $scope.courseid,
+                        'weekBeginning': $scope.rawWeekBeginning,
+                        'weekEnding': $scope.rawWeekEnding
+                    }
+                }).then(function (response) {
+                    //console.log("Worked, these are the averages for the week for weekBegin");
+                    //console.log(response.data);
+                    $scope.courseTasks = response.data;
+                    $scope.dataForTaigaCourseTasks = getDataForTaigaCourseTasks(response.data);
+                });
+            }
+        };
+
+        $scope.IntervalChangedEnd = function (rawWeekEnding) {
+            $scope.rawWeekEnding = rawWeekEnding;
+            console.log("WeekEnding: " + $scope.rawWeekEnding);
+            if ($scope.rawWeekBeginning != null) {
+                $http({
+                    url: './taiga/course_tasks',
+                    method: "GET",
+                    headers: {
+                        'course': $scope.courseid,
+                        'weekBeginning': $scope.rawWeekBeginning,
+                        'weekEnding': $scope.rawWeekEnding
+                    }
+                }).then(function (response) {
+                    //console.log("Worked, these are the averages for the week for weekEnd!");
+                    //console.log(response.data);
+                    $scope.courseTasks = response.data;
+                    $scope.dataForTaigaCourseTasks = getDataForTaigaCourseTasks(response.data);
+                });
+            }
+        };
+
+        $scope.optionsForTaigaCourseTasks = {
+
+            chart: {
+                type: 'multiBarChart',
+                height: 450,
+                margin : {
+                    top: 50,
+                    right: 150,
+                    bottom: 100,
+                    left:100
+                },
+
+                x: function(d){ return d[0]; },
+                y: function(d){ return d[1]; },
+
+                clipEdge: true,
+                duration: 500,
+                stacked: false,
+
+                xAxis: {
+                    axisLabel: 'Days',
+                    showMaxMin: false
+                },
+
+                yAxis: {
+                    axisLabel: 'Taiga Task Totals',
+                    axisLabelDistance: -10
+                }
+            }
+        };
+
+        function getDataForTaigaCourseTasks(array){
+
+            var data = []; var inProgress = []; var toTest = []; var done =[];
+
+            for (var i = 0; i < array.length; i++){
+
+                var valueset1 = [];var valueset2 = [];var valueset3 = [];
+
+                valueset1.push(array[i].date);
+                valueset1.push(array[i].inProgress);
+
+                valueset2.push(array[i].date);
+                valueset2.push(array[i].toTest);
+
+                valueset3.push(array[i].date);
+                valueset3.push(array[i].done);
+
+                inProgress.push(valueset1);
+                toTest.push(valueset2);
+                done.push(valueset3);
+            }
+
+            data.push({color: "#6799ee", key: "IN PROGRESS", values: inProgress});
+            data.push({color: "#000000", key: "READY FOR TEST", values: toTest});
+            data.push({color: "#2E8B57", key: "CLOSED", values: done});
+
+            return data;
+        }
+        $scope.GithubIntervalChangedBegin = function (rawWeekBeginning) {
+            $scope.rawWeekBeginning = rawWeekBeginning;
+            console.log("WeekBeginning: " + $scope.rawWeekBeginning);
+            if ($scope.rawWeekEnding != null) {
+                $http({
+                    url: './github/course_tasks',
+                    method: "GET",
+                    headers: {
+                        'course': $scope.courseid,
+                        'weekBeginning': $scope.rawWeekBeginning,
+                        'weekEnding': $scope.rawWeekEnding
+                    }
+                }).then(function (response) {
+                    //console.log("Worked, these are the averages for the week for weekBegin");
+                    //console.log(response.data);
+                    $scope.courseTasks = response.data;
+                    $scope.dataForGithubCourseTasks = getDataForGithubCourseTasks(response.data);
+                });
+            }
+        };
+
+        $scope.GithubIntervalChangedEnd = function (rawWeekEnding) {
+            $scope.rawWeekEnding = rawWeekEnding;
+            console.log("WeekEnding: " + $scope.rawWeekEnding);
+            if ($scope.rawWeekBeginning != null) {
+                $http({
+                    url: './github/course_tasks',
+                    method: "GET",
+                    headers: {
+                        'course': $scope.courseid,
+                        'weekBeginning': $scope.rawWeekBeginning,
+                        'weekEnding': $scope.rawWeekEnding
+                    }
+                }).then(function (response) {
+                    console.log("Worked, these are the averages for the week for weekEnd!");
+                    console.log(response.data);
+                    $scope.courseTasks = response.data;
+                    $scope.dataForGithubCourseTasks = getDataForGithubCourseTasks(response.data);
+                });
+            }
+        };
+
+        $scope.optionsForGithubCourseTasks = {
+
+            chart: {
+                type: 'multiBarChart',
+                height: 450,
+                margin : {
+                    top: 50,
+                    right: 150,
+                    bottom: 100,
+                    left:100
+                },
+
+                x: function(d){ return d[0]; },
+                y: function(d){ return d[1]; },
+
+                clipEdge: true,
+                duration: 500,
+                stacked: false,
+
+                xAxis: {
+                    axisLabel: 'Days',
+                    showMaxMin: false
+                },
+
+                yAxis: {
+                    axisLabel: 'Github Task Totals',
+                    axisLabelDistance: -10
+                }
+            }
+        };
+
+        function getDataForGithubCourseTasks(array){
+
+            var data = []; var inProgress = []; var toTest = []; var done =[];
+
+            for (var i = 0; i < array.length; i++){
+
+                var valueset1 = [];var valueset2 = [];var valueset3 = [];
+
+                valueset1.push(array[i].commits);
+                valueset2.push(array[i].lines_of_code_added/100);
+               valueset3.push(array[i].lines_of_code_deleted/100);
+
+                inProgress.push(valueset1);
+                toTest.push(valueset2);
+                done.push(valueset3);
+            }
+            console.log(inProgress);
+            console.log(toTest);
+            console.log(done);
+            data.push({color: "#6799ee", key: "Commits", values: inProgress});
+            data.push({color: "#000000", key: "Lines of code added", values: toTest});
+            data.push({color: "#2E8B57", key: "lines of code deleted", values: done});
+
+            return data;
+        }
+        function getGithubCourseActivity(){
+            getGitHubCommitsData();
         }
 
         function getGitHubCommitsData() {
@@ -2080,21 +2282,18 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
             });
         }
 
-        //Function to retrieve the URL and open the detailed Github Activity in new tab
-        function listGetDetailedGithubActivityURL(date) {
+        function listGetJSONGithubActivityURL(URL) {
             $http({
-                url: './github/daily_activity',
-                method: "GET",
-                headers: {'course': course,'team': $scope.teamid }
+                url: URL,
+                method: "GET"
             }).then(function (response) {
-                var URLParam=response.data['github_activity_URL'] +"&start_date=" + date + "&end_date=" + date;
-                //console.log(URLParam);
-                window.open(URLParam);
+                console.log('Successful JSON url' + response.data);
             }, function (response) {
                 //fail case
                 console.log("didn't work");
             });
         }
+
         function processGitHubCommitMax(array){
             var commits = []; var linesOfCodeAdded = []; var linesOfCodeDeleted = [];
             for (var i = 0; i < array.length; i++){
@@ -2184,7 +2383,20 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                 }
             };
         }
-
+        function listGetDetailedGithubActivityURL(date){
+            $http({
+                url: './github/daily_activity_json',
+                method: "GET",
+                headers: {'course': course,'team': $scope.teamid, 'weekBeginning':date,'weekEnding':date}
+            }).then(function (response) {
+                console.log('AG JSON Data '+response.data[0]);
+                console.log(response.data[0]);
+                console.log(response.data);
+            }, function (response) {
+                //fail case
+                console.log("didn't work");
+            });
+        }
         ////* Function to Parse GitHub CommitData for MultiBar Chart * ////
 
         function getDataForGitHubTeamCommitsCharts(array){
@@ -2197,8 +2409,7 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
                 valueset1.push(array[i].gitHubPK.date);
                 valueset1.push(array[i].commits);
-
-                valueset2.push(array[i].gitHubPK.date);
+               valueset2.push(array[i].gitHubPK.date);
                 valueset2.push(array[i].linesOfCodeAdded/100);
 
                 valueset3.push(array[i].gitHubPK.date);

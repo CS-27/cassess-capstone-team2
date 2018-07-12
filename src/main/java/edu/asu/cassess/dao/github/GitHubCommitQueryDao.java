@@ -142,7 +142,19 @@ public class GitHubCommitQueryDao implements IGitHubCommitQueryDao {
         List<CommitData> resultList = query.getResultList();
         return resultList;
     }
-
+    @Override
+    @Transactional
+    public List<CommitData> getCommitsByCourseWithinDate(String course, String beginDate, String endDate) throws DataAccessException {
+        Query query = getEntityManager().createNativeQuery("SELECT date, username, project_name, github_owner, email, course, team, AVG(commits) as commits, AVG(lines_of_code_added) as lines_of_code_added, AVG(lines_of_code_deleted) as lines_of_code_deleted\n" +
+                "FROM \n" +
+                "cassess.commit_data\n" +
+                "WHERE course = ?1 AND date >= ?2 AND date <= ?3\n", CommitData.class);
+        query.setParameter(1, course);
+        query.setParameter(2, beginDate);
+        query.setParameter(3, endDate);
+        List<CommitData> resultList = query.getResultList();
+        return resultList;
+    }
     @Override
     @Transactional
     public List<CommitData> getCommitsByTeam(String course, String team) throws DataAccessException {
