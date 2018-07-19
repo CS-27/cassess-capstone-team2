@@ -110,7 +110,7 @@ public class SlackMessageTotalsQueryDao implements ISlackMessageTotalsQueryDao {
     @Override
     @Transactional
     public List<WeeklyIntervals> getWeeklyIntervalsByStudent(String course, String team, String email) throws DataAccessException {
-        Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, UNIX_TIMESTAMP(weekBeginning) AS rawWeekBeginning, UNIX_TIMESTAMP(weekEnding) AS rawWeekEnding FROM (SELECT DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding' FROM cassess.slack_messagetotals WHERE course = ?1 AND team = ?2 AND email = ?3 group by week(retrievalDate)) w1, (select @rn \\:= 0) vars", WeeklyIntervals.class);
+        Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, UNIX_TIMESTAMP(weekBeginning) AS rawWeekBeginning, UNIX_TIMESTAMP(weekEnding) AS rawWeekEnding FROM (SELECT DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding' FROM cassess.slack_messagetotals WHERE course = ?1 AND team = ?2 AND email = ?3 group by week(retrievalDate)) w1, (select @rn \\:= 0) vars", WeeklyIntervals.class);
         query.setParameter(1, course);
         query.setParameter(2, team);
         query.setParameter(3, email);
@@ -121,7 +121,7 @@ public class SlackMessageTotalsQueryDao implements ISlackMessageTotalsQueryDao {
     @Override
     @Transactional
     public List<WeeklyIntervals> getWeeklyIntervalsByTeam(String course, String team) throws DataAccessException {
-        Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, UNIX_TIMESTAMP(weekBeginning) AS rawWeekBeginning, UNIX_TIMESTAMP(weekEnding) AS rawWeekEnding FROM (SELECT DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding' FROM cassess.slack_messagetotals WHERE course = ?1 AND team = ?2 group by week(retrievalDate)) w1, (select @rn \\:= 0) vars", WeeklyIntervals.class);
+        Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, UNIX_TIMESTAMP(weekBeginning) AS rawWeekBeginning, UNIX_TIMESTAMP(weekEnding) AS rawWeekEnding FROM (SELECT DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding' FROM cassess.slack_messagetotals WHERE course = ?1 AND team = ?2 group by week(retrievalDate)) w1, (select @rn \\:= 0) vars", WeeklyIntervals.class);
         query.setParameter(1, course);
         query.setParameter(2, team);
         List<WeeklyIntervals> resultList = query.getResultList();
@@ -131,7 +131,7 @@ public class SlackMessageTotalsQueryDao implements ISlackMessageTotalsQueryDao {
     @Override
     @Transactional
     public List<WeeklyIntervals> getWeeklyIntervalsByCourse(String course) throws DataAccessException {
-        Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, UNIX_TIMESTAMP(weekBeginning) AS rawWeekBeginning, UNIX_TIMESTAMP(weekEnding) AS rawWeekEnding FROM (SELECT DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding' FROM cassess.slack_messagetotals WHERE course = ?1 group by week(retrievalDate)) w1, (select @rn \\:= 0) vars", WeeklyIntervals.class);
+        Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, UNIX_TIMESTAMP(weekBeginning) AS rawWeekBeginning, UNIX_TIMESTAMP(weekEnding) AS rawWeekEnding FROM (SELECT DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding' FROM cassess.slack_messagetotals WHERE course = ?1 group by week(retrievalDate)) w1, (select @rn \\:= 0) vars", WeeklyIntervals.class);
         query.setParameter(1, course);
         List<WeeklyIntervals> resultList = query.getResultList();
         return resultList;
@@ -142,8 +142,8 @@ public class SlackMessageTotalsQueryDao implements ISlackMessageTotalsQueryDao {
     public List<WeeklyMessageTotals> getWeeklyTotalsByCourse(String course) throws DataAccessException {
         Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
                 "DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding',\n" +
-                "UNIX_TIMESTAMP(DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY)) AS rawWeekBeginning, \n" +
-                "UNIX_TIMESTAMP(DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY)) AS rawWeekEnding,\n" +
+                "UNIX_TIMESTAMP(DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY)) AS rawWeekBeginning, \n" +
+                "UNIX_TIMESTAMP(DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY)) AS rawWeekEnding,\n" +
                 "SUM(total) as 'total'\n" +
                 "FROM\n" +
                 "(SELECT retrievalDate, AVG(messageCount) as total\n" +
@@ -166,8 +166,8 @@ public class SlackMessageTotalsQueryDao implements ISlackMessageTotalsQueryDao {
     public List<WeeklyMessageTotals> getWeeklyTotalsByTeam(String course, String team) throws DataAccessException {
         Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
                 "DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding',\n" +
-                "UNIX_TIMESTAMP(DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY)) AS rawWeekBeginning, \n" +
-                "UNIX_TIMESTAMP(DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY)) AS rawWeekEnding,\n" +
+                "UNIX_TIMESTAMP(DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY)) AS rawWeekBeginning, \n" +
+                "UNIX_TIMESTAMP(DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY)) AS rawWeekEnding,\n" +
                 "SUM(total) as 'total'\n" +
                 "FROM\n" +
                 "(SELECT retrievalDate, AVG(messageCount) as total\n" +
@@ -192,8 +192,8 @@ public class SlackMessageTotalsQueryDao implements ISlackMessageTotalsQueryDao {
     public List<WeeklyMessageTotals> getWeeklyTotalsByStudent(String course, String team, String email) throws DataAccessException {
         Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
                 "DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding',\n" +
-                "UNIX_TIMESTAMP(DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY)) AS rawWeekBeginning, \n" +
-                "UNIX_TIMESTAMP(DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY)) AS rawWeekEnding,\n" +
+                "UNIX_TIMESTAMP(DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY)) AS rawWeekBeginning, \n" +
+                "UNIX_TIMESTAMP(DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY)) AS rawWeekEnding,\n" +
                 "SUM(total) as 'total'\n" +
                 "FROM\n" +
                 "(SELECT retrievalDate, messageCount as total\n" +
@@ -225,8 +225,8 @@ public class SlackMessageTotalsQueryDao implements ISlackMessageTotalsQueryDao {
                         "WHEN total <  50*(days/7)  THEN 0\n" +
                         "END AS weight\n" +
                         "FROM\n" +
-                        "(SELECT (@rn \\:= @rn + 1) as 'week', DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning',\n" +
-                        "DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding',\n" +
+                        "(SELECT (@rn \\:= @rn + 1) as 'week', DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning',\n" +
+                        "DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding',\n" +
                         "COUNT(retrievalDate) as 'days',\n" +
                         "if(messageCount<>0,1,0) as 'frequency',\n" +
                         "SUM(messageCount) as 'total'\n" +
@@ -257,8 +257,8 @@ public class SlackMessageTotalsQueryDao implements ISlackMessageTotalsQueryDao {
                 "WHEN total <  50*(days/7)  THEN 0\n" +
                 "END AS weight\n" +
                 "FROM\n" +
-                "(SELECT (@rn \\:= @rn + 1) as 'week', DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning',\n" +
-                "DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding',\n" +
+                "(SELECT (@rn \\:= @rn + 1) as 'week', DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning',\n" +
+                "DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding',\n" +
                 "COUNT(retrievalDate) as 'days',\n" +
                 "if(messageCount<>0,1,0) as 'frequency',\n" +
                 "SUM(messageCount) as 'total'\n" +
@@ -291,8 +291,8 @@ public class SlackMessageTotalsQueryDao implements ISlackMessageTotalsQueryDao {
                 "WHEN total <  50*(days/7)  THEN 0\n" +
                 "END AS weight\n" +
                 "FROM\n" +
-                "(SELECT (@rn \\:= @rn + 1) as 'week', DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning',\n" +
-                "DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding',\n" +
+                "(SELECT (@rn \\:= @rn + 1) as 'week', DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning',\n" +
+                "DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding',\n" +
                 "COUNT(retrievalDate) as 'days',\n" +
                 "if(messageCount<>0,1,0) as 'frequency',\n" +
                 "SUM(messageCount) as 'total'\n" +
@@ -327,8 +327,8 @@ public class SlackMessageTotalsQueryDao implements ISlackMessageTotalsQueryDao {
                 "WHEN total <  50*(days/7)  THEN 0\n" +
                 "END AS weight\n" +
                 "FROM\n" +
-                "(SELECT (@rn \\:= @rn + 1) as 'week', DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning',\n" +
-                "DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding',\n" +
+                "(SELECT (@rn \\:= @rn + 1) as 'week', DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning',\n" +
+                "DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding',\n" +
                 "COUNT(retrievalDate) as 'days',\n" +
                 "if(messageCount<>0,1,0) as 'frequency',\n" +
                 "SUM(messageCount) as 'total'\n" +
@@ -359,8 +359,8 @@ public class SlackMessageTotalsQueryDao implements ISlackMessageTotalsQueryDao {
                 "WHEN total <  50*(days/7)  THEN 0\n" +
                 "END AS weight\n" +
                 "FROM\n" +
-                "(SELECT (@rn \\:= @rn + 1) as 'week', DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning',\n" +
-                "DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding',\n" +
+                "(SELECT (@rn \\:= @rn + 1) as 'week', DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning',\n" +
+                "DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding',\n" +
                 "COUNT(retrievalDate) as 'days',\n" +
                 "if(messageCount<>0,1,0) as 'frequency',\n" +
                 "SUM(messageCount) as 'total'\n" +
@@ -393,8 +393,8 @@ public class SlackMessageTotalsQueryDao implements ISlackMessageTotalsQueryDao {
                 "WHEN total <  50*(days/7)  THEN 0\n" +
                 "END AS weight\n" +
                 "FROM\n" +
-                "(SELECT (@rn \\:= @rn + 1) as 'week', DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning',\n" +
-                "DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding',\n" +
+                "(SELECT (@rn \\:= @rn + 1) as 'week', DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning',\n" +
+                "DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding',\n" +
                 "COUNT(retrievalDate) as 'days',\n" +
                 "if(messageCount<>0,1,0) as 'frequency',\n" +
                 "SUM(messageCount) as 'total'\n" +

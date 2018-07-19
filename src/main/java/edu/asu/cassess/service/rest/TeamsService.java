@@ -3,6 +3,7 @@ package edu.asu.cassess.service.rest;
 import edu.asu.cassess.dao.rest.TeamsServiceDao;
 import edu.asu.cassess.model.Taiga.Slugs;
 import edu.asu.cassess.model.Taiga.TeamNames;
+import edu.asu.cassess.model.github.PeriodicGithubActivity;
 import edu.asu.cassess.persist.entity.rest.Course;
 import edu.asu.cassess.persist.entity.rest.Team;
 import org.json.JSONObject;
@@ -77,5 +78,17 @@ public class TeamsService implements ITeamsService {
     public <T> Object deleteByCourse(Course course) {
         return teamsDao.deleteByCourse(course);
     }
-
+    @Override
+    public PeriodicGithubActivity listGetDetailedGithubActivityURL(String course, String team) throws DataAccessException {
+        return teamsDao.listGetDetailedGithubActivityURL(course, team);
+    }
+    @Override
+    public String getAGGithubData(String jsonURL){
+        return teamsDao.getAGGithubData(jsonURL);
+    }
+    @Override
+    public void updateGithubAG(String jsonURL, String jsonData){
+         teamsDao.updateGithubAG(jsonURL,jsonData);
+         return;
+    }
 }

@@ -44,7 +44,7 @@ public class GitHubCommitQueryDao implements IGitHubCommitQueryDao {
     @Override
     @Transactional
     public List<WeeklyFreqWeight> getWeightFreqByCourse(String course) throws DataAccessException {
-        Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as week, DATE_ADD(date, INTERVAL 1 DAY) as weekBeginning, DATE_ADD(date, INTERVAL 7 DAY) as weekEnding,\n" +
+        Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as week, date as weekBeginning, DATE_ADD(date, INTERVAL 6 DAY) as weekEnding,\n" +
                 "IF (LOCA < LOCD, 1, IF(TOTC/(DAYOFWEEK(CURDATE()) * 16) > 3, 3, ROUND(TOTC/(DAYOFWEEK(CURDATE()) * 16),3))) AS weight,\n" +
                 "IF(COMT/DAYOFWEEK(CURDATE()) > 3, 3, ROUND(COMT/DAYOFWEEK(CURDATE()),3)) AS frequency\n" +
                 "FROM\n" +
@@ -72,7 +72,7 @@ public class GitHubCommitQueryDao implements IGitHubCommitQueryDao {
     @Override
     @Transactional
     public List<WeeklyFreqWeight> getWeightFreqByTeam(String course, String team) throws DataAccessException {
-        Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as week, DATE_ADD(date, INTERVAL 1 DAY) as weekBeginning, DATE_ADD(date, INTERVAL 7 DAY) as weekEnding,\n" +
+        Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as week, date as weekBeginning, DATE_ADD(date, INTERVAL 6 DAY) as weekEnding,\n" +
                 "IF (LOCA < LOCD, 1, IF(TOTC/(DAYOFWEEK(CURDATE()) * 16) > 3, 3, ROUND(TOTC/(DAYOFWEEK(CURDATE()) * 16),3))) AS weight,\n" +
                 "IF(COMT/DAYOFWEEK(CURDATE()) > 3, 3, ROUND(COMT/DAYOFWEEK(CURDATE()),3)) AS frequency\n" +
                 "FROM\n" +
@@ -102,7 +102,7 @@ public class GitHubCommitQueryDao implements IGitHubCommitQueryDao {
     @Override
     @Transactional
     public List<WeeklyFreqWeight> getWeightFreqByStudent(String course, String team, String email) throws DataAccessException {
-        Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as week, DATE_ADD(date, INTERVAL 1 DAY) as weekBeginning, DATE_ADD(date, INTERVAL 7 DAY) as weekEnding,\n" +
+        Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as week,date as weekBeginning, DATE_ADD(date, INTERVAL 6 DAY) as weekEnding,\n" +
                 "IF (LOCA < LOCD, 1, IF(TOTC/(DAYOFWEEK(CURDATE()) * 16) > 3, 3, ROUND(TOTC/(DAYOFWEEK(CURDATE()) * 16),3))) AS weight,\n" +
                 "IF(COMT/DAYOFWEEK(CURDATE()) > 3, 3, ROUND(COMT/DAYOFWEEK(CURDATE()),3)) AS frequency\n" +
                 "FROM\n" +

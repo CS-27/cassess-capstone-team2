@@ -110,7 +110,7 @@ public class TaskTotalsQueryDao implements ITaskTotalsQueryDao {
     @Override
     @Transactional
     public List<WeeklyIntervals> getWeeklyIntervalsByStudent(String course, String team, String email) throws DataAccessException {
-        Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, UNIX_TIMESTAMP(weekBeginning) AS rawWeekBeginning, UNIX_TIMESTAMP(weekEnding) AS rawWeekEnding FROM (SELECT DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding' FROM cassess.tasktotals WHERE course = ?1 AND team = ?2 AND email = ?3 group by week(retrievalDate)) w1, (select @rn \\:= 0) vars", WeeklyIntervals.class);
+        Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, UNIX_TIMESTAMP(weekBeginning) AS rawWeekBeginning, UNIX_TIMESTAMP(weekEnding) AS rawWeekEnding FROM (SELECT DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding' FROM cassess.tasktotals WHERE course = ?1 AND team = ?2 AND email = ?3 group by week(retrievalDate)) w1, (select @rn \\:= 0) vars", WeeklyIntervals.class);
         query.setParameter(1, course);
         query.setParameter(2, team);
         query.setParameter(3, email);
@@ -121,7 +121,7 @@ public class TaskTotalsQueryDao implements ITaskTotalsQueryDao {
     @Override
     @Transactional
     public List<WeeklyIntervals> getWeeklyIntervalsByTeam(String course, String team) throws DataAccessException {
-        Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, UNIX_TIMESTAMP(weekBeginning) AS rawWeekBeginning, UNIX_TIMESTAMP(weekEnding) AS rawWeekEnding FROM (SELECT DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding' FROM cassess.tasktotals WHERE course = ?1 AND team = ?2 group by week(retrievalDate)) w1, (select @rn \\:= 0) vars", WeeklyIntervals.class);
+        Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, UNIX_TIMESTAMP(weekBeginning) AS rawWeekBeginning, UNIX_TIMESTAMP(weekEnding) AS rawWeekEnding FROM (SELECT DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding' FROM cassess.tasktotals WHERE course = ?1 AND team = ?2 group by week(retrievalDate)) w1, (select @rn \\:= 0) vars", WeeklyIntervals.class);
         query.setParameter(1, course);
         query.setParameter(2, team);
         List<WeeklyIntervals> resultList = query.getResultList();
@@ -131,7 +131,7 @@ public class TaskTotalsQueryDao implements ITaskTotalsQueryDao {
     @Override
     @Transactional
     public List<WeeklyIntervals> getWeeklyIntervalsByCourse(String course) throws DataAccessException {
-        Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, UNIX_TIMESTAMP(weekBeginning) AS rawWeekBeginning, UNIX_TIMESTAMP(weekEnding) AS rawWeekEnding FROM (SELECT DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding' FROM cassess.tasktotals WHERE course = ?1 group by week(retrievalDate)) w1, (select @rn \\:= 0) vars", WeeklyIntervals.class);
+        Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, UNIX_TIMESTAMP(weekBeginning) AS rawWeekBeginning, UNIX_TIMESTAMP(weekEnding) AS rawWeekEnding FROM (SELECT DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding' FROM cassess.tasktotals WHERE course = ?1 group by week(retrievalDate)) w1, (select @rn \\:= 0) vars", WeeklyIntervals.class);
         query.setParameter(1, course);
         List<WeeklyIntervals> resultList = query.getResultList();
         return resultList;
@@ -143,8 +143,8 @@ public class TaskTotalsQueryDao implements ITaskTotalsQueryDao {
         Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, UNIX_TIMESTAMP(weekBeginning) AS rawWeekBeginning, UNIX_TIMESTAMP(weekEnding) AS rawWeekEnding,\n" +
                 "                ROUND(AVG(DoneActivity), 3) as 'DoneActivity', ROUND(AVG(InProgressActivity), 3) as 'InProgressActivity', ROUND(AVG(ToTestActivity), 3) as 'ToTestActivity'\n" +
                 "                FROM\n" +
-                "                (SELECT DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
-                "                DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', SUM(tasksClosedDIFF) as 'DoneActivity', \n" +
+                "                (SELECT DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
+                "                DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', SUM(tasksClosedDIFF) as 'DoneActivity', \n" +
                 "                SUM(tasksInProgressDIFF) as 'InProgressActivity', SUM(tasksReadyForTestDIFF) as 'ToTestActivity'\n" +
                 "                FROM\n" +
                 "                (select\n" +
@@ -182,8 +182,8 @@ public class TaskTotalsQueryDao implements ITaskTotalsQueryDao {
     public List<WeeklyActivity> getWeeklyUpdatesByStudent(String course, String team, String email) throws DataAccessException {
         Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, DoneActivity, InProgressActivity, ToTestActivity, UNIX_TIMESTAMP(weekBeginning) AS rawWeekBeginning, UNIX_TIMESTAMP(weekEnding) AS rawWeekEnding\n" +
                 "FROM\n" +
-                "                               (SELECT DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning',\n" +
-                "                                DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', SUM(tasksClosedDIFF) as 'DoneActivity', \n" +
+                "                               (SELECT DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning',\n" +
+                "                                DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', SUM(tasksClosedDIFF) as 'DoneActivity', \n" +
                 "\t\t\t\t\t\t\tSUM(tasksInProgressDIFF) as 'InProgressActivity', SUM(tasksReadyForTestDIFF) as 'ToTestActivity'\n" +
                 "                                FROM\n" +
                 "                                (select\n" +
@@ -224,8 +224,8 @@ public class TaskTotalsQueryDao implements ITaskTotalsQueryDao {
         Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, UNIX_TIMESTAMP(weekBeginning) AS rawWeekBeginning, UNIX_TIMESTAMP(weekEnding) AS rawWeekEnding,\n" +
                 "                ROUND(AVG(DoneActivity), 3) as 'DoneActivity', ROUND(AVG(InProgressActivity), 3) as 'InProgressActivity', ROUND(AVG(ToTestActivity), 3) as 'ToTestActivity'\n" +
                 "                FROM\n" +
-                "                (SELECT DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
-                "                DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', SUM(tasksClosedDIFF) as 'DoneActivity', \n" +
+                "                (SELECT DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
+                "                DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', SUM(tasksClosedDIFF) as 'DoneActivity', \n" +
                 "                SUM(tasksInProgressDIFF) as 'InProgressActivity', SUM(tasksReadyForTestDIFF) as 'ToTestActivity'\n" +
                 "                FROM\n" +
                 "                (select\n" +
@@ -264,8 +264,8 @@ public class TaskTotalsQueryDao implements ITaskTotalsQueryDao {
                 "(SELECT (@rn \\:= @rn + 1) as 'week', days, weekBeginning, weekEnding, ROUND(frequency/daysFreq, 3) as 'frequency', \n" +
                 "COALESCE(SUM(NULLIF(Done ,0)), 0) as 'Done', COALESCE(SUM(NULLIF(InProgress ,0)), 0) as 'InProgress', COALESCE(SUM(NULLIF(ToTest ,0)), 0) as 'ToTest'\n" +
                 "FROM\n" +
-                "(SELECT days, COUNT(retrievalDate) as daysFreq, (retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
-                "                DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', \n" +
+                "(SELECT days, COUNT(retrievalDate) as daysFreq, (retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
+                "                DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', \n" +
                 "                SUM(frequency) as 'frequency', COALESCE(SUM(NULLIF(tasksClosedDIFF ,0)), 0) as 'Done', \n" +
                 "                COALESCE(SUM(NULLIF(tasksInProgressDIFF ,0)), 0) as 'InProgress', COALESCE(SUM(NULLIF(tasksReadyForTestDIFF ,0)), 0) as 'ToTest'\n" +
                 "FROM\n" +
@@ -313,8 +313,8 @@ public class TaskTotalsQueryDao implements ITaskTotalsQueryDao {
                 "(SELECT (@rn \\:= @rn + 1) as 'week', days, weekBeginning, weekEnding, ROUND(frequency/daysFreq, 3) as 'frequency', \n" +
                 "COALESCE(NULLIF(Done ,0), 0) as 'Done', COALESCE(NULLIF(InProgress ,0), 0) as 'InProgress', COALESCE(NULLIF(ToTest ,0), 0) as 'ToTest'\n" +
                 "FROM\n" +
-                "(SELECT days, COUNT(retrievalDate) as daysFreq, (retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
-                "                DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', \n" +
+                "(SELECT days, COUNT(retrievalDate) as daysFreq, (retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
+                "                DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', \n" +
                 "                SUM(frequency) as 'frequency', COALESCE(AVG(NULLIF(tasksClosedDIFF ,0)), 0) as 'Done', \n" +
                 "                COALESCE(AVG(NULLIF(tasksInProgressDIFF ,0)), 0) as 'InProgress', COALESCE(AVG(NULLIF(tasksReadyForTestDIFF ,0)), 0) as 'ToTest'\n" +
                 "FROM\n" +
@@ -361,8 +361,8 @@ public class TaskTotalsQueryDao implements ITaskTotalsQueryDao {
                 "(SELECT (@rn \\:= @rn + 1) as 'week', days, weekBeginning, weekEnding, ROUND(frequency/daysFreq, 3) as 'frequency', \n" +
                 "COALESCE(NULLIF(Done ,0), 0) as 'Done', COALESCE(NULLIF(InProgress ,0), 0) as 'InProgress', COALESCE(NULLIF(ToTest ,0), 0) as 'ToTest'\n" +
                 "FROM\n" +
-                "(SELECT days, COUNT(retrievalDate) as daysFreq, (retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
-                "                DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', \n" +
+                "(SELECT days, COUNT(retrievalDate) as daysFreq, (retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
+                "                DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', \n" +
                 "                SUM(frequency) as 'frequency', COALESCE(AVG(NULLIF(tasksClosedDIFF ,0)), 0) as 'Done', \n" +
                 "                COALESCE(AVG(NULLIF(tasksInProgressDIFF ,0)), 0) as 'InProgress', COALESCE(AVG(NULLIF(tasksReadyForTestDIFF ,0)), 0) as 'ToTest'\n" +
                 "FROM\n" +
@@ -407,8 +407,8 @@ public class TaskTotalsQueryDao implements ITaskTotalsQueryDao {
                 "(SELECT (@rn \\:= @rn + 1) as 'week', days, weekBeginning, weekEnding, ROUND(frequency/daysFreq, 3) as 'frequency', \n" +
                 "COALESCE(SUM(NULLIF(Done ,0)), 0) as 'Done', COALESCE(SUM(NULLIF(InProgress ,0)), 0) as 'InProgress', COALESCE(SUM(NULLIF(ToTest ,0)), 0) as 'ToTest'\n" +
                 "FROM\n" +
-                "(SELECT days, COUNT(retrievalDate) as daysFreq, (retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
-                "                DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', \n" +
+                "(SELECT days, COUNT(retrievalDate) as daysFreq, (retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
+                "                DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', \n" +
                 "                SUM(frequency) as 'frequency', COALESCE(SUM(NULLIF(tasksClosedDIFF ,0)), 0) as 'Done', \n" +
                 "                COALESCE(SUM(NULLIF(tasksInProgressDIFF ,0)), 0) as 'InProgress', COALESCE(SUM(NULLIF(tasksReadyForTestDIFF ,0)), 0) as 'ToTest'\n" +
                 "FROM\n" +
@@ -456,8 +456,8 @@ public class TaskTotalsQueryDao implements ITaskTotalsQueryDao {
                 "(SELECT (@rn \\:= @rn + 1) as 'week', days, weekBeginning, weekEnding, ROUND(frequency/daysFreq, 3) as 'frequency', \n" +
                 "COALESCE(NULLIF(Done ,0), 0) as 'Done', COALESCE(NULLIF(InProgress ,0), 0) as 'InProgress', COALESCE(NULLIF(ToTest ,0), 0) as 'ToTest'\n" +
                 "FROM\n" +
-                "(SELECT days, COUNT(retrievalDate) as daysFreq, (retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
-                "                DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', \n" +
+                "(SELECT days, COUNT(retrievalDate) as daysFreq, (retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
+                "                DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', \n" +
                 "                SUM(frequency) as 'frequency', COALESCE(AVG(NULLIF(tasksClosedDIFF ,0)), 0) as 'Done', \n" +
                 "                COALESCE(AVG(NULLIF(tasksInProgressDIFF ,0)), 0) as 'InProgress', COALESCE(AVG(NULLIF(tasksReadyForTestDIFF ,0)), 0) as 'ToTest'\n" +
                 "FROM\n" +
@@ -504,8 +504,8 @@ public class TaskTotalsQueryDao implements ITaskTotalsQueryDao {
                 "(SELECT (@rn \\:= @rn + 1) as 'week', days, weekBeginning, weekEnding, ROUND(frequency/daysFreq, 3) as 'frequency', \n" +
                 "COALESCE(NULLIF(Done ,0), 0) as 'Done', COALESCE(NULLIF(InProgress ,0), 0) as 'InProgress', COALESCE(NULLIF(ToTest ,0), 0) as 'ToTest'\n" +
                 "FROM\n" +
-                "(SELECT days, COUNT(retrievalDate) as daysFreq, (retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
-                "                DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', \n" +
+                "(SELECT days, COUNT(retrievalDate) as daysFreq, (retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
+                "                DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', \n" +
                 "                SUM(frequency) as 'frequency', COALESCE(AVG(NULLIF(tasksClosedDIFF ,0)), 0) as 'Done', \n" +
                 "                COALESCE(AVG(NULLIF(tasksInProgressDIFF ,0)), 0) as 'InProgress', COALESCE(AVG(NULLIF(tasksReadyForTestDIFF ,0)), 0) as 'ToTest'\n" +
                 "FROM\n" +
@@ -547,8 +547,8 @@ public class TaskTotalsQueryDao implements ITaskTotalsQueryDao {
     public List<WeeklyAverages> getWeeklyAverageByCourse(String course) throws DataAccessException {
         Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, ROUND(COALESCE(AVG(NULLIF(DoneAverage ,0)), 0), 0) as 'DoneAverage', ROUND(COALESCE(AVG(NULLIF(InProgressAverage ,0)), 0), 0) as 'InProgressAverage', ROUND(COALESCE(AVG(NULLIF(ToTestAverage ,0)), 0), 0) as 'ToTestAverage'\n" +
                 "FROM\n" +
-                "(SELECT DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
-                "DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', COALESCE(AVG(NULLIF(tasksClosedDIFF ,0)), 0) as 'DoneAverage', \n" +
+                "(SELECT DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
+                "DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', COALESCE(AVG(NULLIF(tasksClosedDIFF ,0)), 0) as 'DoneAverage', \n" +
                 "COALESCE(AVG(NULLIF(tasksInProgressDIFF ,0)), 0) as 'InProgressAverage', COALESCE(AVG(NULLIF(tasksReadyForTestDIFF ,0)), 0) as 'ToTestAverage'\n" +
                 "FROM(select\n" +
                 "      TSK.retrievalDate,\n" +
@@ -583,8 +583,8 @@ public class TaskTotalsQueryDao implements ITaskTotalsQueryDao {
     public List<WeeklyAverages> getWeeklyAverageByTeam(String course, String team) throws DataAccessException {
         Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, ROUND(COALESCE(AVG(NULLIF(DoneAverage ,0)), 0), 0) as 'DoneAverage', ROUND(COALESCE(AVG(NULLIF(InProgressAverage ,0)), 0), 0) as 'InProgressAverage', ROUND(COALESCE(AVG(NULLIF(ToTestAverage ,0)), 0), 0) as 'ToTestAverage'\n" +
                 "FROM\n" +
-                "(SELECT DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
-                "DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', COALESCE(AVG(NULLIF(tasksClosedDIFF ,0)), 0) as 'DoneAverage', \n" +
+                "(SELECT DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
+                "DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', COALESCE(AVG(NULLIF(tasksClosedDIFF ,0)), 0) as 'DoneAverage', \n" +
                 "COALESCE(AVG(NULLIF(tasksInProgressDIFF ,0)), 0) as 'InProgressAverage', COALESCE(AVG(NULLIF(tasksReadyForTestDIFF ,0)), 0) as 'ToTestAverage'\n" +
                 "FROM(select\n" +
                 "      TSK.retrievalDate,\n" +
@@ -621,8 +621,8 @@ public class TaskTotalsQueryDao implements ITaskTotalsQueryDao {
     public List<WeeklyAverages> getWeeklyAverageByStudent(String course, String team, String email) throws DataAccessException {
         Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, ROUND(COALESCE(AVG(NULLIF(DoneAverage ,0)), 0), 0) as 'DoneAverage', ROUND(COALESCE(AVG(NULLIF(InProgressAverage ,0)), 0), 0) as 'InProgressAverage', ROUND(COALESCE(AVG(NULLIF(ToTestAverage ,0)), 0), 0) as 'ToTestAverage'\n" +
                 "FROM\n" +
-                "(SELECT DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
-                "DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', COALESCE(AVG(NULLIF(tasksClosedDIFF ,0)), 0) as 'DoneAverage', \n" +
+                "(SELECT DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
+                "DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', COALESCE(AVG(NULLIF(tasksClosedDIFF ,0)), 0) as 'DoneAverage', \n" +
                 "COALESCE(AVG(NULLIF(tasksInProgressDIFF ,0)), 0) as 'InProgressAverage', COALESCE(AVG(NULLIF(tasksReadyForTestDIFF ,0)), 0) as 'ToTestAverage'\n" +
                 "FROM(select\n" +
                 "      TSK.retrievalDate,\n" +
@@ -661,8 +661,8 @@ public class TaskTotalsQueryDao implements ITaskTotalsQueryDao {
     public List<WeeklyAverages> lastTwoWeekAveragesByCourse(String course) throws DataAccessException {
         Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, ROUND(COALESCE(AVG(NULLIF(DoneAverage ,0)), 0), 0) as 'DoneAverage', ROUND(COALESCE(AVG(NULLIF(InProgressAverage ,0)), 0), 0) as 'InProgressAverage', ROUND(COALESCE(AVG(NULLIF(ToTestAverage ,0)), 0), 0) as 'ToTestAverage'\n" +
                 "FROM\n" +
-                "(SELECT DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
-                "DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', COALESCE(AVG(NULLIF(tasksClosedDIFF ,0)), 0) as 'DoneAverage', \n" +
+                "(SELECT DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
+                "DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', COALESCE(AVG(NULLIF(tasksClosedDIFF ,0)), 0) as 'DoneAverage', \n" +
                 "COALESCE(AVG(NULLIF(tasksInProgressDIFF ,0)), 0) as 'InProgressAverage', COALESCE(AVG(NULLIF(tasksReadyForTestDIFF ,0)), 0) as 'ToTestAverage'\n" +
                 "FROM(select\n" +
                 "      TSK.retrievalDate,\n" +
@@ -698,8 +698,8 @@ public class TaskTotalsQueryDao implements ITaskTotalsQueryDao {
     public List<WeeklyAverages> lastTwoWeekAveragesByTeam(String course, String team) throws DataAccessException {
         Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, ROUND(COALESCE(AVG(NULLIF(DoneAverage ,0)), 0), 0) as 'DoneAverage', ROUND(COALESCE(AVG(NULLIF(InProgressAverage ,0)), 0), 0) as 'InProgressAverage', ROUND(COALESCE(AVG(NULLIF(ToTestAverage ,0)), 0), 0) as 'ToTestAverage'\n" +
                 "FROM\n" +
-                "(SELECT DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
-                "DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', COALESCE(AVG(NULLIF(tasksClosedDIFF ,0)), 0) as 'DoneAverage', \n" +
+                "(SELECT DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
+                "DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', COALESCE(AVG(NULLIF(tasksClosedDIFF ,0)), 0) as 'DoneAverage', \n" +
                 "COALESCE(AVG(NULLIF(tasksInProgressDIFF ,0)), 0) as 'InProgressAverage', COALESCE(AVG(NULLIF(tasksReadyForTestDIFF ,0)), 0) as 'ToTestAverage'\n" +
                 "FROM(select\n" +
                 "      TSK.retrievalDate,\n" +
@@ -737,8 +737,8 @@ public class TaskTotalsQueryDao implements ITaskTotalsQueryDao {
     public List<WeeklyAverages> lastTwoWeekAveragesByStudent(String course, String team, String email) throws DataAccessException {
         Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, ROUND(COALESCE(AVG(NULLIF(DoneAverage ,0)), 0), 0) as 'DoneAverage', ROUND(COALESCE(AVG(NULLIF(InProgressAverage ,0)), 0), 0) as 'InProgressAverage', ROUND(COALESCE(AVG(NULLIF(ToTestAverage ,0)), 0), 0) as 'ToTestAverage'\n" +
                 "FROM\n" +
-                "(SELECT DATE(retrievalDate + INTERVAL (1 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
-                "DATE(retrievalDate + INTERVAL (7 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', COALESCE(AVG(NULLIF(tasksClosedDIFF ,0)), 0) as 'DoneAverage', \n" +
+                "(SELECT DATE(retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
+                "DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', COALESCE(AVG(NULLIF(tasksClosedDIFF ,0)), 0) as 'DoneAverage', \n" +
                 "COALESCE(AVG(NULLIF(tasksInProgressDIFF ,0)), 0) as 'InProgressAverage', COALESCE(AVG(NULLIF(tasksReadyForTestDIFF ,0)), 0) as 'ToTestAverage'\n" +
                 "FROM(select\n" +
                 "      TSK.retrievalDate,\n" +

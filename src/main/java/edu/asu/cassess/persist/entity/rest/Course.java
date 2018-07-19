@@ -32,6 +32,7 @@ public class Course {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "course", fetch = FetchType.EAGER)
     protected List<Team> teams;
 
+
     @Fetch(FetchMode.SUBSELECT)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "course", fetch = FetchType.EAGER)
     protected List<Admin> admins;
