@@ -5,6 +5,7 @@
     import com.fasterxml.jackson.databind.ObjectWriter;
     import edu.asu.cassess.model.Taiga.Slugs;
     import edu.asu.cassess.model.Taiga.TeamNames;
+    import edu.asu.cassess.model.github.PeriodicGithubActivity;
     import edu.asu.cassess.persist.entity.rest.*;
     import edu.asu.cassess.persist.repo.rest.TeamRepo;
     import edu.asu.cassess.service.rest.IChannelService;
@@ -242,5 +243,46 @@
                 return new RestResponse("No teams in course " + course.getCourse() + " exist in the database");
             }
         }
+        //Retrieve the parameter values for detailed Github data URL
+        public PeriodicGithubActivity listGetDetailedGithubActivityURL(String course, String team) throws DataAccessException {
+            Query query = getEntityManager().createNativeQuery("select distinct team.github_token,student.github_username,commitdata.github_owner,team.github_repo_id " +
+                    "from teams team,students student, commit_data commitdata " +
+                    "where team.course = commitdata.course " +
+                    "and team.team_name=commitdata.team and commitdata.email=student.email " +
+                    "and team.course=?1 and team.team_name=?2");
 
+            query.setParameter(1, course);
+            query.setParameter(2, team);
+            List<Object[]> results = query.getResultList();
+            String userids = "",owner="",repo_id="",token="";
+            for(Object[] item : results) {
+                token=(String)item[0];
+                userids = userids + item[1] + "%2C";
+                owner=(String)item[2];
+                repo_id=(String)item[3];
+            }
+            System.out.println("[LOG] "+userids);
+            userids = userids.substring(0,userids.length()-3);
+            PeriodicGithubActivity finalPOJO = new PeriodicGithubActivity(token,owner,repo_id,userids);
+            finalPOJO.setGithub_activity_URL(token,owner,repo_id,userids);
+            return finalPOJO;
+        }
+        public String getAGGithubData(String jsonURL){
+            Query query = getEntityManager().createNativeQuery("select ag_result from github_ag where url=?1");
+            query.setParameter(1, jsonURL);
+            List results = query.getResultList();
+            if (!results.isEmpty()) {
+                return (String) results.get(0);
+            } else {
+                return "-1";
+            }
+        }
+        public void updateGithubAG(String jsonURL, String jsonData){
+            System.out.println("[LOG]: URL "+jsonURL + " DATA "+jsonData);
+            Query query = getEntityManager().createNativeQuery("insert into github_ag select ?1,?2 from dual where not exists (select 1 from github_ag where URL=?1)");
+            query.setParameter(1,jsonURL);
+            query.setParameter(2,jsonData);
+            query.executeUpdate();
+            return;
+        }
     }

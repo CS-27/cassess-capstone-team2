@@ -10,6 +10,7 @@ import edu.asu.cassess.dao.taiga.IMemberQueryDao;
 import edu.asu.cassess.dao.taiga.IProjectQueryDao;
 import edu.asu.cassess.dao.taiga.ITaskTotalsQueryDao;
 import edu.asu.cassess.model.Taiga.*;
+import edu.asu.cassess.model.github.PeriodicGithubActivity;
 import edu.asu.cassess.model.rest.CourseList;
 import edu.asu.cassess.model.slack.DailyMessageTotals;
 import edu.asu.cassess.model.slack.WeeklyMessageTotals;
@@ -163,6 +164,38 @@ public class AppController {
         //System.out.print("Team: " + team.getTeam());
         //}
         return new ResponseEntity<List<TeamNames>>(teamList, HttpStatus.OK);
+    }
+    //Get the URL to the detailed Github Activity for a team
+    @RequestMapping(value = "/github/daily_activity_json", method = RequestMethod.GET)
+    public String listGetJSONGithubActivityURL(@RequestHeader(name = "course", required = true) String course,
+                                               @RequestHeader(name = "team", required = true) String team,
+                                               @RequestHeader(name = "weekBeginning", required = true) String weekBeginning,
+                                               @RequestHeader(name = "weekEnding", required = true) String weekEnding,
+                                               HttpServletRequest request, HttpServletResponse response) {
+        PeriodicGithubActivity weightList = teamService.listGetDetailedGithubActivityURL(course, team);
+        String jsonURL = weightList.getGithub_activity_URL()+"&start_date="+weekBeginning+"&end_date="+weekEnding;
+        StringBuffer response1 = new StringBuffer();
+        String jsonData = teamService.getAGGithubData(jsonURL);
+        if(jsonData.equals("-1")) {
+            try {
+                URL obj = new URL(jsonURL);
+                HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+                con.setRequestMethod("GET");
+                con.setRequestProperty("User-Agent", USER_AGENT);
+                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                String inputLine;
+
+                while ((inputLine = in.readLine()) != null) {
+                    response1.append(inputLine);
+                }
+                in.close();
+                jsonData = response1.toString();
+                teamService.updateGithubAG(jsonURL,jsonData);
+             } catch (Exception e) {
+                System.out.println("Unsuccessful");
+            }
+        }
+        return jsonData;
     }
 
     //Previous Query Based method to obtain Students assigned to a particular team/project

@@ -2,6 +2,7 @@ package edu.asu.cassess.service.rest;
 
 import edu.asu.cassess.model.Taiga.Slugs;
 import edu.asu.cassess.model.Taiga.TeamNames;
+import edu.asu.cassess.model.github.PeriodicGithubActivity;
 import edu.asu.cassess.persist.entity.rest.Course;
 import edu.asu.cassess.persist.entity.rest.Team;
 import org.json.JSONObject;
@@ -35,4 +36,9 @@ public interface ITeamsService {
     List<TeamNames> listGetTeamNames(String course);
 
     <T> Object deleteByCourse(Course course);
+    PeriodicGithubActivity listGetDetailedGithubActivityURL(String course, String team) throws DataAccessException;
+
+    String getAGGithubData(String jsonURL);
+
+    void updateGithubAG(String jsonURL, String jsonData);
 }
