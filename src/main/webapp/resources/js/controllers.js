@@ -1098,12 +1098,12 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                 //console.log("Worked!");
                 //console.log(response.data);
                 $scope.courseActivity = response.data;
-                getTaigaIntervals();
+                getGithubIntervals();
                 $scope.dataForTaigaCourseActivity =  getDataForCourseTaigaActivityCharts(response.data);
             }, function (response) {
                 //fail case
                 console.log("didn't work");
-                getTaigaIntervals();
+                getGithubIntervals();
             });
         }
 
@@ -1189,9 +1189,9 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                 return taigaLineChartMax;
             }
         }
-        function getTaigaIntervals() {
+        function getGithubIntervals() {
             $http({
-                url: './taiga/course_intervals',
+                url: './github/course_intervals',
                 method: "GET",
                 headers: {'course': $scope.courseid}
             }).then(function (response) {
@@ -1954,9 +1954,9 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                 return taigaLineChartMax;
             }
         }
-        function getTaigaIntervals() {
+        function getGithubIntervals() {
             $http({
-                url: './taiga/team_intervals',
+                url: './github/team_intervals',
                 method: "GET",
                 headers: {'course': course, 'team': $scope.teamid}
             }).then(function (response) {
@@ -2108,12 +2108,12 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                 //console.log("Worked!");
                 //console.log(response.data);
                 $scope.teamActivity = response.data;
-                getTaigaIntervals();
+                getGithubIntervals();
                 $scope.dataForTaigaTeamActivity = getDataForTeamTaigaActivityCharts(response.data);
             }, function (response) {
                 //fail case
                 console.log("didn't work: " + response.data);
-                getTaigaIntervals();
+                getGithubIntervals();
             });
         }
 
@@ -2182,7 +2182,6 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
         }
 
         function commitOptions() {
-            listGetDetailedGithubActivityURL();
             $scope.optionsForGitHubTeamCommits = {
 
                 chart: {
@@ -3046,12 +3045,12 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                 //console.log("Worked!");
                 //console.log(response.data);
                 $scope.studentActivity = response.data;
-                getTaigaIntervals();
+                getGithubIntervals();
                 $scope.dataForTaigaStudentActivity =  getDataForStudentTaigaActivityCharts(response.data);
             }, function (response) {
                 //fail case
                 console.log("Didn't Work");
-                getTaigaIntervals();
+                getGithubIntervals();
 
             });
         }
@@ -3137,9 +3136,9 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                 return taigaLineChartMax;
             }
         }
-        function getTaigaIntervals() {
+        function getGithubIntervals() {
             $http({
-                url: './taiga/student_intervals',
+                url: './github/student_intervals',
                 method: "GET",
                 headers: {'course': course, 'team': team, 'email': studentemail}
             }).then(function (response) {
