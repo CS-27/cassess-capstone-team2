@@ -401,143 +401,45 @@ public class TaskTotalsQueryDao implements ITaskTotalsQueryDao {
 
     @Override
     @Transactional
-    public List<WeeklyFreqWeight> weeklyWeightFreqByStudent(String course, String team, String email) throws DataAccessException {
-        Query query = getEntityManager().createNativeQuery("SELECT week, weekBeginning, weekEnding, IF(frequency > 3, 3, frequency) as 'frequency', IF((GREATEST(Done/(days + 1), InProgress/(days + 1), ToTest/(days + 1))) > 3, 3, ROUND(GREATEST(Done/(days + 1), InProgress/(days + 1), ToTest/(days + 1)), 3)) AS weight\n" +
-                "FROM\n" +
-                "(SELECT (@rn \\:= @rn + 1) as 'week', days, weekBeginning, weekEnding, ROUND(frequency/daysFreq, 3) as 'frequency', \n" +
-                "COALESCE(SUM(NULLIF(Done ,0)), 0) as 'Done', COALESCE(SUM(NULLIF(InProgress ,0)), 0) as 'InProgress', COALESCE(SUM(NULLIF(ToTest ,0)), 0) as 'ToTest'\n" +
-                "FROM\n" +
-                "(SELECT days, COUNT(retrievalDate) as daysFreq, (retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
-                "                DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', \n" +
-                "                SUM(frequency) as 'frequency', COALESCE(SUM(NULLIF(tasksClosedDIFF ,0)), 0) as 'Done', \n" +
-                "                COALESCE(SUM(NULLIF(tasksInProgressDIFF ,0)), 0) as 'InProgress', COALESCE(SUM(NULLIF(tasksReadyForTestDIFF ,0)), 0) as 'ToTest'\n" +
-                "FROM\n" +
-                "(SELECT retrievalDate, COUNT(retrievalDate) as 'days', SUM(IF(tasksClosedDIFF<>0,1,0) + IF(tasksInProgressDIFF<>0,1,0) + IF(tasksReadyForTestDIFF<>0,1,0)) as 'frequency', tasksClosedDIFF, tasksInProgressDiff, tasksReadyForTestDIFF\n" +
-                "FROM\n" +
-                "(select\n" +
-                "                      TSK.retrievalDate,\n" +
-                "                      TSK.fullName,\n" +
-                "                      if( @lastfullName = TSK.fullName, ABS(TSK.tasksClosed - @lasttasksClosed), TSK.tasksClosed) as tasksClosedDIFF,\n" +
-                "                      @lasttasksClosed \\:= TSK.tasksClosed,\n" +
-                "                      if( @lastfullName = TSK.fullName, ABS(TSK.tasksInProgress - @lasttasksInProgress), TSK.tasksInProgress) as tasksInProgressDIFF,\n" +
-                "                      @lasttasksInProgress \\:= TSK.tasksInProgress,\n" +
-                "                      if( @lastfullName = TSK.fullName, ABS(TSK.tasksReadyForTest - @lasttasksReadyForTest), TSK.tasksReadyForTest ) as tasksReadyForTestDIFF,\n" +
-                "                      @lastfullName \\:= TSK.fullName,\n" +
-                "                      @lasttasksReadyForTest \\:= TSK.tasksReadyForTest\n" +
-                "                   from\n" +
-                "                      tasktotals TSK,\n" +
-                "                      ( select @lastfullName \\:= 0,\n" +
-                "                   @lasttasksClosed \\:= 0,\n" +
-                "                               @lasttasksInProgress \\:= 0, \n" +
-                "                               @lasttasksReadyForTest \\:= 0) SQLVars\n" +
-                "                WHERE course = ?1\n" +
-                "                AND team = ?2\n" +
-                "                AND email = ?3\n" +
-                "                   order by\n" +
-                "                      TSK.fullName,\n" +
-                "                      TSK.retrievalDate) query1\n" +
-                "                      GROUP BY retrievalDate) query2,\n" +
-                "                      (select @rn \\:= 0) var\n" +
-                "                      GROUP BY weekBeginning) query3 \n" +
-                "                      GROUP BY weekBeginning) query4\n" +
-                "                      GROUP BY weekBeginning", WeeklyFreqWeight.class);
+    public List<WeeklyFreqWeight> weeklyWeightFreqByStudent(String course, String team, String email, String beginDate, String endDate)
+            throws DataAccessException
+    {
+        Query query = getEntityManager().createNativeQuery("SELECT week, weekBeginning, weekEnding, IF(frequency > 3, 3, frequency) as 'frequency', IF((GREATEST(Done/(days + 1), InProgress/(days + 1), ToTest/(days + 1))) > 3, 3, ROUND(GREATEST(Done/(days + 1), InProgress/(days + 1), ToTest/(days + 1)), 3)) AS weight\nFROM\n(SELECT (@rn \\:= @rn + 1) as 'week', days, weekBeginning, weekEnding, ROUND(frequency/daysFreq, 3) as 'frequency', \nCOALESCE(SUM(NULLIF(Done ,0)), 0) as 'Done', COALESCE(SUM(NULLIF(InProgress ,0)), 0) as 'InProgress', COALESCE(SUM(NULLIF(ToTest ,0)), 0) as 'ToTest'\nFROM\n(SELECT days, COUNT(retrievalDate) as daysFreq, (retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n                DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', \n                SUM(frequency) as 'frequency', COALESCE(SUM(NULLIF(tasksClosedDIFF ,0)), 0) as 'Done', \n                COALESCE(SUM(NULLIF(tasksInProgressDIFF ,0)), 0) as 'InProgress', COALESCE(SUM(NULLIF(tasksReadyForTestDIFF ,0)), 0) as 'ToTest'\nFROM\n(SELECT retrievalDate, COUNT(retrievalDate) as 'days', SUM(IF(tasksClosedDIFF<>0,1,0) + IF(tasksInProgressDIFF<>0,1,0) + IF(tasksReadyForTestDIFF<>0,1,0)) as 'frequency', tasksClosedDIFF, tasksInProgressDiff, tasksReadyForTestDIFF\nFROM\n(select\n                      TSK.retrievalDate,\n                      TSK.fullName,\n                      if( @lastfullName = TSK.fullName, ABS(TSK.tasksClosed - @lasttasksClosed), TSK.tasksClosed) as tasksClosedDIFF,\n                      @lasttasksClosed \\:= TSK.tasksClosed,\n                      if( @lastfullName = TSK.fullName, ABS(TSK.tasksInProgress - @lasttasksInProgress), TSK.tasksInProgress) as tasksInProgressDIFF,\n                      @lasttasksInProgress \\:= TSK.tasksInProgress,\n                      if( @lastfullName = TSK.fullName, ABS(TSK.tasksReadyForTest - @lasttasksReadyForTest), TSK.tasksReadyForTest ) as tasksReadyForTestDIFF,\n                      @lastfullName \\:= TSK.fullName,\n                      @lasttasksReadyForTest \\:= TSK.tasksReadyForTest\n                   from\n                      tasktotals TSK,\n                      ( select @lastfullName \\:= 0,\n                   @lasttasksClosed \\:= 0,\n                               @lasttasksInProgress \\:= 0, \n                               @lasttasksReadyForTest \\:= 0) SQLVars\n                WHERE course = ?1\n                AND team = ?2\n                AND email = ?3\n                AND retrievalDate >= ?4                 AND retrievalDate <= ?5 \n                   order by\n                      TSK.fullName,\n                      TSK.retrievalDate) query1\n                      GROUP BY retrievalDate) query2,\n                      (select @rn \\:= 0) var\n                      GROUP BY weekBeginning) query3 \n                      GROUP BY weekBeginning) query4\n                      GROUP BY weekBeginning", WeeklyFreqWeight.class);
+
         query.setParameter(1, course);
         query.setParameter(2, team);
         query.setParameter(3, email);
+        query.setParameter(4, beginDate);
+        query.setParameter(5, endDate);
         List<WeeklyFreqWeight> resultList = query.getResultList();
         return resultList;
     }
 
     @Override
     @Transactional
-    public List<WeeklyFreqWeight> weeklyWeightFreqByTeam(String course, String team) throws DataAccessException {
-        Query query = getEntityManager().createNativeQuery("SELECT week, weekBeginning, weekEnding, IF(frequency > 3, 3, frequency) as 'frequency', IF((GREATEST(Done/(days + 1), InProgress/(days + 1), ToTest/(days + 1))) > 3, 3, ROUND(GREATEST(Done/(days + 1), InProgress/(days + 1), ToTest/(days + 1)), 3)) AS weight\n" +
-                "FROM\n" +
-                "(SELECT (@rn \\:= @rn + 1) as 'week', days, weekBeginning, weekEnding, ROUND(frequency/daysFreq, 3) as 'frequency', \n" +
-                "COALESCE(NULLIF(Done ,0), 0) as 'Done', COALESCE(NULLIF(InProgress ,0), 0) as 'InProgress', COALESCE(NULLIF(ToTest ,0), 0) as 'ToTest'\n" +
-                "FROM\n" +
-                "(SELECT days, COUNT(retrievalDate) as daysFreq, (retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
-                "                DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', \n" +
-                "                SUM(frequency) as 'frequency', COALESCE(AVG(NULLIF(tasksClosedDIFF ,0)), 0) as 'Done', \n" +
-                "                COALESCE(AVG(NULLIF(tasksInProgressDIFF ,0)), 0) as 'InProgress', COALESCE(AVG(NULLIF(tasksReadyForTestDIFF ,0)), 0) as 'ToTest'\n" +
-                "FROM\n" +
-                "(SELECT retrievalDate, COUNT(retrievalDate) as 'days', AVG(IF(tasksClosedDIFF<>0,1,0) + IF(tasksInProgressDIFF<>0,1,0) + IF(tasksReadyForTestDIFF<>0,1,0)) as 'frequency', \n" +
-                "SUM(tasksClosedDIFF) AS tasksClosedDIFF, SUM(tasksInProgressDIFF) AS tasksInProgressDIFF, SUM(tasksReadyForTestDIFF) AS tasksReadyForTestDIFF\n" +
-                "FROM\n" +
-                "(select\n" +
-                "                      TSK.retrievalDate,\n" +
-                "                      TSK.fullName,\n" +
-                "                      if( @lastfullName = TSK.fullName, ABS(TSK.tasksClosed - @lasttasksClosed), TSK.tasksClosed) as tasksClosedDIFF,\n" +
-                "                      @lasttasksClosed \\:= TSK.tasksClosed,\n" +
-                "                      if( @lastfullName = TSK.fullName, ABS(TSK.tasksInProgress - @lasttasksInProgress), TSK.tasksInProgress) as tasksInProgressDIFF,\n" +
-                "                      @lasttasksInProgress \\:= TSK.tasksInProgress,\n" +
-                "                      if( @lastfullName = TSK.fullName, ABS(TSK.tasksReadyForTest - @lasttasksReadyForTest), TSK.tasksReadyForTest ) as tasksReadyForTestDIFF,\n" +
-                "                      @lastfullName \\:= TSK.fullName,\n" +
-                "                      @lasttasksReadyForTest \\:= TSK.tasksReadyForTest\n" +
-                "                   from\n" +
-                "                      tasktotals TSK,\n" +
-                "                      ( select @lastfullName \\:= 0,\n" +
-                "                   @lasttasksClosed \\:= 0,\n" +
-                "                               @lasttasksInProgress \\:= 0, \n" +
-                "                               @lasttasksReadyForTest \\:= 0) SQLVars\n" +
-                "                WHERE course = ?1\n" +
-                "                AND team = ?2\n" +
-                "                   order by\n" +
-                "                      TSK.fullName,\n" +
-                "                      TSK.retrievalDate) query1\n" +
-                "                      GROUP BY retrievalDate) query2,\n" +
-                "                      (select @rn \\:= 0) var\n" +
-                "                      GROUP BY weekBeginning) query3 \n" +
-                "                      GROUP BY weekBeginning) query4\n" +
-                "                      GROUP BY weekBeginning", WeeklyFreqWeight.class);
+    public List<WeeklyFreqWeight> weeklyWeightFreqByTeam(String course, String team, String beginDate, String endDate)
+            throws DataAccessException
+    {
+        Query query = getEntityManager().createNativeQuery("SELECT week, weekBeginning, weekEnding, IF(frequency > 3, 3, frequency) as 'frequency', IF((GREATEST(Done/(days + 1), InProgress/(days + 1), ToTest/(days + 1))) > 3, 3, ROUND(GREATEST(Done/(days + 1), InProgress/(days + 1), ToTest/(days + 1)), 3)) AS weight\nFROM\n(SELECT (@rn \\:= @rn + 1) as 'week', days, weekBeginning, weekEnding, ROUND(frequency/daysFreq, 3) as 'frequency', \nCOALESCE(NULLIF(Done ,0), 0) as 'Done', COALESCE(NULLIF(InProgress ,0), 0) as 'InProgress', COALESCE(NULLIF(ToTest ,0), 0) as 'ToTest'\nFROM\n(SELECT days, COUNT(retrievalDate) as daysFreq, (retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n                DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', \n                SUM(frequency) as 'frequency', COALESCE(AVG(NULLIF(tasksClosedDIFF ,0)), 0) as 'Done', \n                COALESCE(AVG(NULLIF(tasksInProgressDIFF ,0)), 0) as 'InProgress', COALESCE(AVG(NULLIF(tasksReadyForTestDIFF ,0)), 0) as 'ToTest'\nFROM\n(SELECT retrievalDate, COUNT(retrievalDate) as 'days', AVG(IF(tasksClosedDIFF<>0,1,0) + IF(tasksInProgressDIFF<>0,1,0) + IF(tasksReadyForTestDIFF<>0,1,0)) as 'frequency', \nSUM(tasksClosedDIFF) AS tasksClosedDIFF, SUM(tasksInProgressDIFF) AS tasksInProgressDIFF, SUM(tasksReadyForTestDIFF) AS tasksReadyForTestDIFF\nFROM\n(select\n                      TSK.retrievalDate,\n                      TSK.fullName,\n                      if( @lastfullName = TSK.fullName, ABS(TSK.tasksClosed - @lasttasksClosed), TSK.tasksClosed) as tasksClosedDIFF,\n                      @lasttasksClosed \\:= TSK.tasksClosed,\n                      if( @lastfullName = TSK.fullName, ABS(TSK.tasksInProgress - @lasttasksInProgress), TSK.tasksInProgress) as tasksInProgressDIFF,\n                      @lasttasksInProgress \\:= TSK.tasksInProgress,\n                      if( @lastfullName = TSK.fullName, ABS(TSK.tasksReadyForTest - @lasttasksReadyForTest), TSK.tasksReadyForTest ) as tasksReadyForTestDIFF,\n                      @lastfullName \\:= TSK.fullName,\n                      @lasttasksReadyForTest \\:= TSK.tasksReadyForTest\n                   from\n                      tasktotals TSK,\n                      ( select @lastfullName \\:= 0,\n                   @lasttasksClosed \\:= 0,\n                               @lasttasksInProgress \\:= 0, \n                               @lasttasksReadyForTest \\:= 0) SQLVars\n                WHERE course = ?1\n                AND team = ?2\n                AND retrievalDate >= ?3                 AND retrievalDate <= ?4 \n                   order by\n                      TSK.fullName,\n                      TSK.retrievalDate) query1\n                      GROUP BY retrievalDate) query2,\n                      (select @rn \\:= 0) var\n                      GROUP BY weekBeginning) query3 \n                      GROUP BY weekBeginning) query4\n                      GROUP BY weekBeginning", WeeklyFreqWeight.class);
+
         query.setParameter(1, course);
         query.setParameter(2, team);
+        query.setParameter(3, beginDate);
+        query.setParameter(4, endDate);
         List<WeeklyFreqWeight> resultList = query.getResultList();
         return resultList;
     }
 
     @Override
     @Transactional
-    public List<WeeklyFreqWeight> weeklyWeightFreqByCourse(String course) throws DataAccessException {
-        Query query = getEntityManager().createNativeQuery("SELECT week, weekBeginning, weekEnding, IF(frequency > 3, 3, frequency) as 'frequency', IF((GREATEST(Done/(days + 1), InProgress/(days + 1), ToTest/(days + 1))) > 3, 3, ROUND(GREATEST(Done/(days + 1), InProgress/(days + 1), ToTest/(days + 1)), 3)) AS weight\n" +
-                "FROM\n" +
-                "(SELECT (@rn \\:= @rn + 1) as 'week', days, weekBeginning, weekEnding, ROUND(frequency/daysFreq, 3) as 'frequency', \n" +
-                "COALESCE(NULLIF(Done ,0), 0) as 'Done', COALESCE(NULLIF(InProgress ,0), 0) as 'InProgress', COALESCE(NULLIF(ToTest ,0), 0) as 'ToTest'\n" +
-                "FROM\n" +
-                "(SELECT days, COUNT(retrievalDate) as daysFreq, (retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n" +
-                "                DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', \n" +
-                "                SUM(frequency) as 'frequency', COALESCE(AVG(NULLIF(tasksClosedDIFF ,0)), 0) as 'Done', \n" +
-                "                COALESCE(AVG(NULLIF(tasksInProgressDIFF ,0)), 0) as 'InProgress', COALESCE(AVG(NULLIF(tasksReadyForTestDIFF ,0)), 0) as 'ToTest'\n" +
-                "FROM\n" +
-                "(SELECT retrievalDate, COUNT(retrievalDate) as 'days', AVG(IF(tasksClosedDIFF<>0,1,0) + IF(tasksInProgressDIFF<>0,1,0) + IF(tasksReadyForTestDIFF<>0,1,0)) as 'frequency', \n" +
-                "SUM(tasksClosedDIFF) AS tasksClosedDIFF, SUM(tasksInProgressDIFF) AS tasksInProgressDIFF, SUM(tasksReadyForTestDIFF) AS tasksReadyForTestDIFF\n" +
-                "FROM\n" +
-                "(select\n" +
-                "                      TSK.retrievalDate,\n" +
-                "                      TSK.fullName,\n" +
-                "                      if( @lastfullName = TSK.fullName, ABS(TSK.tasksClosed - @lasttasksClosed), TSK.tasksClosed) as tasksClosedDIFF,\n" +
-                "                      @lasttasksClosed \\:= TSK.tasksClosed,\n" +
-                "                      if( @lastfullName = TSK.fullName, ABS(TSK.tasksInProgress - @lasttasksInProgress), TSK.tasksInProgress) as tasksInProgressDIFF,\n" +
-                "                      @lasttasksInProgress \\:= TSK.tasksInProgress,\n" +
-                "                      if( @lastfullName = TSK.fullName, ABS(TSK.tasksReadyForTest - @lasttasksReadyForTest), TSK.tasksReadyForTest ) as tasksReadyForTestDIFF,\n" +
-                "                      @lastfullName \\:= TSK.fullName,\n" +
-                "                      @lasttasksReadyForTest \\:= TSK.tasksReadyForTest\n" +
-                "                   from\n" +
-                "                      tasktotals TSK,\n" +
-                "                      ( select @lastfullName \\:= 0,\n" +
-                "                   @lasttasksClosed \\:= 0,\n" +
-                "                               @lasttasksInProgress \\:= 0, \n" +
-                "                               @lasttasksReadyForTest \\:= 0) SQLVars\n" +
-                "                WHERE course = ?1\n" +
-                "                   order by\n" +
-                "                      TSK.fullName,\n" +
-                "                      TSK.retrievalDate) query1\n" +
-                "                      GROUP BY retrievalDate) query2,\n" +
-                "                      (select @rn \\:= 0) var\n" +
-                "                      GROUP BY weekBeginning) query3 \n" +
-                "                      GROUP BY weekBeginning) query4\n" +
-                "                      GROUP BY weekBeginning", WeeklyFreqWeight.class);
+    public List<WeeklyFreqWeight> weeklyWeightFreqByCourse(String course, String beginDate, String endDate)
+            throws DataAccessException
+    {
+        Query query = getEntityManager().createNativeQuery("SELECT week, weekBeginning, weekEnding, IF(frequency > 3, 3, frequency) as 'frequency', IF((GREATEST(Done/(days + 1), InProgress/(days + 1), ToTest/(days + 1))) > 3, 3, ROUND(GREATEST(Done/(days + 1), InProgress/(days + 1), ToTest/(days + 1)), 3)) AS weight\nFROM\n(SELECT (@rn \\:= @rn + 1) as 'week', days, weekBeginning, weekEnding, ROUND(frequency/daysFreq, 3) as 'frequency', \nCOALESCE(NULLIF(Done ,0), 0) as 'Done', COALESCE(NULLIF(InProgress ,0), 0) as 'InProgress', COALESCE(NULLIF(ToTest ,0), 0) as 'ToTest'\nFROM\n(SELECT days, COUNT(retrievalDate) as daysFreq, (retrievalDate + INTERVAL (0 - DAYOFWEEK(retrievalDate)) DAY) as 'weekBeginning', \n                DATE(retrievalDate + INTERVAL (6 - DAYOFWEEK(retrievalDate)) DAY) as 'weekEnding', \n                SUM(frequency) as 'frequency', COALESCE(AVG(NULLIF(tasksClosedDIFF ,0)), 0) as 'Done', \n                COALESCE(AVG(NULLIF(tasksInProgressDIFF ,0)), 0) as 'InProgress', COALESCE(AVG(NULLIF(tasksReadyForTestDIFF ,0)), 0) as 'ToTest'\nFROM\n(SELECT retrievalDate, COUNT(retrievalDate) as 'days', AVG(IF(tasksClosedDIFF<>0,1,0) + IF(tasksInProgressDIFF<>0,1,0) + IF(tasksReadyForTestDIFF<>0,1,0)) as 'frequency', \nSUM(tasksClosedDIFF) AS tasksClosedDIFF, SUM(tasksInProgressDIFF) AS tasksInProgressDIFF, SUM(tasksReadyForTestDIFF) AS tasksReadyForTestDIFF\nFROM\n(select\n                      TSK.retrievalDate,\n                      TSK.fullName,\n                      if( @lastfullName = TSK.fullName, ABS(TSK.tasksClosed - @lasttasksClosed), TSK.tasksClosed) as tasksClosedDIFF,\n                      @lasttasksClosed \\:= TSK.tasksClosed,\n                      if( @lastfullName = TSK.fullName, ABS(TSK.tasksInProgress - @lasttasksInProgress), TSK.tasksInProgress) as tasksInProgressDIFF,\n                      @lasttasksInProgress \\:= TSK.tasksInProgress,\n                      if( @lastfullName = TSK.fullName, ABS(TSK.tasksReadyForTest - @lasttasksReadyForTest), TSK.tasksReadyForTest ) as tasksReadyForTestDIFF,\n                      @lastfullName \\:= TSK.fullName,\n                      @lasttasksReadyForTest \\:= TSK.tasksReadyForTest\n                   from\n                      tasktotals TSK,\n                      ( select @lastfullName \\:= 0,\n                   @lasttasksClosed \\:= 0,\n                               @lasttasksInProgress \\:= 0, \n                               @lasttasksReadyForTest \\:= 0) SQLVars\n                WHERE course = ?1\n                AND retrievalDate >= ?2                 AND retrievalDate <= ?3 \n                   order by\n                      TSK.fullName,\n                      TSK.retrievalDate) query1\n                      GROUP BY retrievalDate) query2,\n                      (select @rn \\:= 0) var\n                      GROUP BY weekBeginning) query3 \n                      GROUP BY weekBeginning) query4\n                      GROUP BY weekBeginning", WeeklyFreqWeight.class);
+
         query.setParameter(1, course);
+        query.setParameter(2, beginDate);
+        query.setParameter(3, endDate);
         List<WeeklyFreqWeight> resultList = query.getResultList();
         return resultList;
     }

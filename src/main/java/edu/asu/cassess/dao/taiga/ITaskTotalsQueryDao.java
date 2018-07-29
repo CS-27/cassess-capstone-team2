@@ -50,11 +50,17 @@ public interface ITaskTotalsQueryDao {
 
     List<WeeklyFreqWeight> twoWeekWeightFreqByCourse(String course) throws DataAccessException;
 
-    List<WeeklyFreqWeight> weeklyWeightFreqByStudent(String course, String team, String student) throws DataAccessException;
+    @Transactional
+    List<WeeklyFreqWeight> weeklyWeightFreqByStudent(String course, String team, String email, String beginDate, String endDate)
+            throws DataAccessException;
 
-    List<WeeklyFreqWeight> weeklyWeightFreqByTeam(String course, String team) throws DataAccessException;
+    @Transactional
+    List<WeeklyFreqWeight> weeklyWeightFreqByTeam(String course, String team, String beginDate, String endDate)
+                    throws DataAccessException;
 
-    List<WeeklyFreqWeight> weeklyWeightFreqByCourse(String course) throws DataAccessException;
+    @Transactional
+    List<WeeklyFreqWeight> weeklyWeightFreqByCourse(String course, String beginDate, String endDate)
+                            throws DataAccessException;
 
     List<WeeklyAverages> getWeeklyAverageByCourse(String course) throws DataAccessException;
 

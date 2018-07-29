@@ -62,11 +62,14 @@ public interface ISlackMessageTotalsQueryDao {
     List<WeeklyFreqWeight> twoWeekWeightFreqByStudent(String course, String team, String email) throws DataAccessException;
 
     @Transactional
-    List<WeeklyFreqWeight> weeklyWeightFreqByCourse(String course) throws DataAccessException;
+    List<WeeklyFreqWeight> weeklyWeightFreqByCourse(String course, String beginDate, String endDate)
+            throws DataAccessException;
 
     @Transactional
-    List<WeeklyFreqWeight> weeklyWeightFreqByTeam(String course, String team) throws DataAccessException;
+    List<WeeklyFreqWeight> weeklyWeightFreqByTeam(String course, String team, String beginDate, String endDate)
+                    throws DataAccessException;
 
     @Transactional
-    List<WeeklyFreqWeight> weeklyWeightFreqByStudent(String course, String team, String email) throws DataAccessException;
+    List<WeeklyFreqWeight> weeklyWeightFreqByStudent(String course, String team, String email, String beginDate, String endDate)
+                            throws DataAccessException;
 }

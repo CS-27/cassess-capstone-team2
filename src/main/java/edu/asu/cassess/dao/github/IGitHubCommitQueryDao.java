@@ -50,4 +50,16 @@ public interface IGitHubCommitQueryDao {
 
     @Transactional
     List<WeeklyIntervals> getWeeklyIntervalsByCourse(String course) throws DataAccessException;
+
+    @Transactional
+    List<WeeklyFreqWeight> getWeeklyWeightFreqByCourse(String course, String beginDate, String endDate)
+            throws DataAccessException;
+
+    @Transactional
+    List<WeeklyFreqWeight> getWeeklyWeightFreqByTeam(String course, String team, String beginDate, String endDate)
+                    throws DataAccessException;
+
+    @Transactional
+    List<WeeklyFreqWeight> getWeeklyWeightFreqByStudent(String course, String team, String email, String beginDate, String endDate)
+                            throws DataAccessException;
 }

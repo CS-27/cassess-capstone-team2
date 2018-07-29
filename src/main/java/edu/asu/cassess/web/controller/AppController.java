@@ -49,6 +49,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import static javax.ws.rs.core.HttpHeaders.USER_AGENT;
@@ -375,9 +376,46 @@ public class AppController {
     public ResponseEntity<List<WeeklyFreqWeight>> getTaigaStudentWeightFreq(@RequestHeader(name = "course", required = true) String course,
                                                                             @RequestHeader(name = "team", required = true) String team,
                                                                             @RequestHeader(name = "email", required = true) String email,
-                                                                            String weekEnding, HttpServletRequest request, HttpServletResponse response) {
-        List<WeeklyFreqWeight> weightFreqList = (List<WeeklyFreqWeight>) taskTotalService.weeklyWeightFreqByStudent(course, team, email);
-        return new ResponseEntity<List<WeeklyFreqWeight>>(weightFreqList, HttpStatus.OK);
+                                                                            @RequestHeader(name="weekBeginning", required=true) long weekBeginning,
+                                                                            @RequestHeader(name="weekEnding", required=true) long weekEnding,
+                                                                            HttpServletRequest request, HttpServletResponse response)
+    {
+        Course courseObj = (Course)this.courseService.read(course);
+        Date dateBegin = new Date(weekBeginning * 1000L);
+        Date dateEnd = new Date(weekEnding * 1000L);
+        SimpleDateFormat sdfBegin = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdfEnd = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDateBegin = sdfBegin.format(dateBegin);
+        String formattedDateEnd = sdfEnd.format(dateEnd);
+        String courseDateBegin = sdfBegin.format(courseObj.getStart_date());
+        String courseDateEnd = sdfEnd.format(courseObj.getEnd_date());
+        List<WeeklyFreqWeight> totalWeightFreqList = this.taskTotalService.weeklyWeightFreqByStudent(course, team, email, courseDateBegin, courseDateEnd);
+        List<WeeklyFreqWeight> weightFreqList = this.taskTotalService.weeklyWeightFreqByStudent(course, team, email, formattedDateBegin, formattedDateEnd);
+        double freqTot = 0.0D;
+        double weightTot = 0.0D;
+        int count = 0;
+        for (int i = 0; i < weightFreqList.size(); i++)
+        {
+            freqTot += Double.parseDouble(weightFreqList.get(i).getFrequency());
+            weightTot += Double.parseDouble(weightFreqList.get(i).getWeight());
+            count++;
+        }
+        WeeklyFreqWeight firstEntry = new WeeklyFreqWeight("1", formattedDateBegin, formattedDateEnd, String.format("%.3f", (freqTot/count)), String.format("%.3f", (weightTot/count)));
+        freqTot = 0.0D;
+        weightTot = 0.0D;
+        count = 0;
+        for (int i = 0; i < totalWeightFreqList.size(); i++)
+        {
+            freqTot += Double.parseDouble(totalWeightFreqList.get(i).getFrequency());
+            weightTot += Double.parseDouble(totalWeightFreqList.get(i).getWeight());
+            count++;
+        }
+        WeeklyFreqWeight secondEntry = new WeeklyFreqWeight("2", courseDateBegin, courseDateEnd, String.format("%.3f", (freqTot/count)), String.format("%.3f", (weightTot/count)));
+        return new ResponseEntity<List<WeeklyFreqWeight>>(new ArrayList<WeeklyFreqWeight>() {{
+            add(firstEntry);
+            add(secondEntry);
+        }}, HttpStatus.OK);
+
     }
 
     //Weekly average weights for a project
@@ -385,18 +423,92 @@ public class AppController {
     @RequestMapping(value = "/taiga/team_weightFreq", method = RequestMethod.GET)
     public ResponseEntity<List<WeeklyFreqWeight>> getTaigaTeamWeight(@RequestHeader(name = "course", required = true) String course,
                                                                      @RequestHeader(name = "team", required = true) String team,
-                                                                     String weekEnding, HttpServletRequest request, HttpServletResponse response) {
-        List<WeeklyFreqWeight> weightFreqList = (List<WeeklyFreqWeight>) taskTotalService.weeklyWeightFreqByTeam(course, team);
-        return new ResponseEntity<List<WeeklyFreqWeight>>(weightFreqList, HttpStatus.OK);
+                                                                     @RequestHeader(name="weekBeginning", required=true) long weekBeginning,
+                                                                     @RequestHeader(name="weekEnding", required=true) long weekEnding,
+                                                                     HttpServletRequest request, HttpServletResponse response)
+    {
+        Course courseObj = (Course)this.courseService.read(course);
+        Date dateBegin = new Date(weekBeginning * 1000L);
+        Date dateEnd = new Date(weekEnding * 1000L);
+        SimpleDateFormat sdfBegin = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdfEnd = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDateBegin = sdfBegin.format(dateBegin);
+        String formattedDateEnd = sdfEnd.format(dateEnd);
+        String courseDateBegin = sdfBegin.format(courseObj.getStart_date());
+        String courseDateEnd = sdfEnd.format(courseObj.getEnd_date());
+        List<WeeklyFreqWeight> totalWeightFreqList = this.taskTotalService.weeklyWeightFreqByTeam(course, team, courseDateBegin, courseDateEnd);
+        List<WeeklyFreqWeight> weightFreqList = this.taskTotalService.weeklyWeightFreqByTeam(course, team, formattedDateBegin, formattedDateEnd);
+        double freqTot = 0.0D;
+        double weightTot = 0.0D;
+        int count = 0;
+        for (int i = 0; i < weightFreqList.size(); i++)
+        {
+            freqTot += Double.parseDouble(weightFreqList.get(i).getFrequency());
+            weightTot += Double.parseDouble(weightFreqList.get(i).getWeight());
+            count++;
+        }
+        WeeklyFreqWeight firstEntry = new WeeklyFreqWeight("1", formattedDateBegin, formattedDateEnd, String.format("%.3f", (freqTot/count)), String.format("%.3f", (weightTot/count)));
+        freqTot = 0.0D;
+        weightTot = 0.0D;
+        count = 0;
+        for (int i = 0; i < totalWeightFreqList.size(); i++)
+        {
+            freqTot += Double.parseDouble(totalWeightFreqList.get(i).getFrequency());
+            weightTot += Double.parseDouble(totalWeightFreqList.get(i).getWeight());
+            count++;
+        }
+        WeeklyFreqWeight secondEntry = new WeeklyFreqWeight("2", courseDateBegin, courseDateEnd, String.format("%.3f", (freqTot/count)), String.format("%.3f", (weightTot/count)));
+        return new ResponseEntity<List<WeeklyFreqWeight>>(new ArrayList<WeeklyFreqWeight>() {{
+            add(firstEntry);
+            add(secondEntry);
+        }}, HttpStatus.OK);
+
     }
 
     //Weekly average weights for a course
     @ResponseBody
     @RequestMapping(value = "/taiga/course_weightFreq", method = RequestMethod.GET)
     public ResponseEntity<List<WeeklyFreqWeight>> getTaigaCourseWeight(@RequestHeader(name = "course", required = true) String course,
-                                                                       String weekEnding, HttpServletRequest request, HttpServletResponse response) {
-        List<WeeklyFreqWeight> weightFreqList = (List<WeeklyFreqWeight>) taskTotalService.weeklyWeightFreqByCourse(course);
-        return new ResponseEntity<List<WeeklyFreqWeight>>(weightFreqList, HttpStatus.OK);
+                                                                       @RequestHeader(name="weekBeginning", required=true) long weekBeginning,
+                                                                       @RequestHeader(name="weekEnding", required=true) long weekEnding,
+                                                                       HttpServletRequest request, HttpServletResponse response)
+    {
+        Course courseObj = (Course)this.courseService.read(course);
+        Date dateBegin = new Date(weekBeginning * 1000L);
+        Date dateEnd = new Date(weekEnding * 1000L);
+        SimpleDateFormat sdfBegin = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdfEnd = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDateBegin = sdfBegin.format(dateBegin);
+        String formattedDateEnd = sdfEnd.format(dateEnd);
+        String courseDateBegin = sdfBegin.format(courseObj.getStart_date());
+        String courseDateEnd = sdfEnd.format(courseObj.getEnd_date());
+        List<WeeklyFreqWeight> totalWeightFreqList = this.taskTotalService.weeklyWeightFreqByCourse(course, courseDateBegin, courseDateEnd);
+        List<WeeklyFreqWeight> weightFreqList = this.taskTotalService.weeklyWeightFreqByCourse(course, formattedDateBegin, formattedDateEnd);
+        double freqTot = 0.0D;
+        double weightTot = 0.0D;
+        int count = 0;
+        for (int i = 0; i < weightFreqList.size(); i++)
+        {
+            freqTot += Double.parseDouble(weightFreqList.get(i).getFrequency());
+            weightTot += Double.parseDouble(weightFreqList.get(i).getWeight());
+            count++;
+        }
+        WeeklyFreqWeight firstEntry = new WeeklyFreqWeight("1", formattedDateBegin, formattedDateEnd, String.format("%.3f", (freqTot/count)), String.format("%.3f", (weightTot/count)));
+        freqTot = 0.0D;
+        weightTot = 0.0D;
+        count = 0;
+        for (int i = 0; i < totalWeightFreqList.size(); i++)
+        {
+            freqTot += Double.parseDouble(totalWeightFreqList.get(i).getFrequency());
+            weightTot += Double.parseDouble(totalWeightFreqList.get(i).getWeight());
+            count++;
+        }
+        WeeklyFreqWeight secondEntry = new WeeklyFreqWeight("2", courseDateBegin, courseDateEnd, String.format("%.3f", (freqTot/count)), String.format("%.3f", (weightTot/count)));
+        return new ResponseEntity<List<WeeklyFreqWeight>>(new ArrayList<WeeklyFreqWeight>() {{
+            add(firstEntry);
+            add(secondEntry);
+        }}, HttpStatus.OK);
+
     }
 
     //Current and last week Taiga weight for a student
@@ -429,35 +541,144 @@ public class AppController {
         return new ResponseEntity<List<WeeklyFreqWeight>>(weightFreqList, HttpStatus.OK);
     }
 
-    //Current and last week GH weight for a student
+
     @ResponseBody
-    @RequestMapping(value = "/github/student_quickweightFreq", method = RequestMethod.GET)
+    @RequestMapping(value = "/github/student_weightFreq", method = RequestMethod.GET)
     public ResponseEntity<List<WeeklyFreqWeight>> twoWeekStudentWeightFreqGH(@RequestHeader(name = "course", required = true) String course,
                                                                              @RequestHeader(name = "team", required = true) String team,
                                                                              @RequestHeader(name = "email", required = true) String email,
-                                                                             String weekEnding, HttpServletRequest request, HttpServletResponse response) {
-        List<WeeklyFreqWeight> weightFreqList = (List<WeeklyFreqWeight>) gitHubQueryDao.getWeightFreqByStudent(course, team, email);
-        return new ResponseEntity<List<WeeklyFreqWeight>>(weightFreqList, HttpStatus.OK);
+                                                                             @RequestHeader(name="weekBeginning", required=true) long weekBeginning,
+                                                                             @RequestHeader(name="weekEnding", required=true) long weekEnding,
+                                                                             HttpServletRequest request, HttpServletResponse response)
+    {
+        Course courseObj = (Course)this.courseService.read(course);
+        Date dateBegin = new Date(weekBeginning * 1000L);
+        Date dateEnd = new Date(weekEnding * 1000L);
+        SimpleDateFormat sdfBegin = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdfEnd = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDateBegin = sdfBegin.format(dateBegin);
+        String formattedDateEnd = sdfEnd.format(dateEnd);
+        String courseDateBegin = sdfBegin.format(courseObj.getStart_date());
+        String courseDateEnd = sdfEnd.format(courseObj.getEnd_date());
+        List<WeeklyFreqWeight> totalWeightFreqList = this.gitHubQueryDao.getWeeklyWeightFreqByStudent(course, team, email, courseDateBegin, courseDateEnd);
+        List<WeeklyFreqWeight> weightFreqList = this.gitHubQueryDao.getWeeklyWeightFreqByStudent(course, team, email, formattedDateBegin, formattedDateEnd);
+        double freqTot = 0.0D;
+        double weightTot = 0.0D;
+        int count = 0;
+        for (int i = 0; i < weightFreqList.size(); i++)
+        {
+            freqTot += Double.parseDouble(weightFreqList.get(i).getFrequency());
+            weightTot += Double.parseDouble(weightFreqList.get(i).getWeight());
+            count++;
+        }
+        WeeklyFreqWeight firstEntry = new WeeklyFreqWeight("1", formattedDateBegin, formattedDateEnd, String.format("%.3f", (freqTot/count)), String.format("%.3f", (weightTot/count)));
+        freqTot = 0.0D;
+        weightTot = 0.0D;
+        count = 0;
+        for (int i = 0; i < totalWeightFreqList.size(); i++)
+        {
+            freqTot += Double.parseDouble(totalWeightFreqList.get(i).getFrequency());
+            weightTot += Double.parseDouble(totalWeightFreqList.get(i).getWeight());
+            count++;
+        }
+        WeeklyFreqWeight secondEntry = new WeeklyFreqWeight("2", courseDateBegin, courseDateEnd, String.format("%.3f", (freqTot/count)), String.format("%.3f", (weightTot/count)));
+        return new ResponseEntity<List<WeeklyFreqWeight>>(new ArrayList<WeeklyFreqWeight>() {{
+            add(firstEntry);
+            add(secondEntry);
+        }}, HttpStatus.OK);
     }
 
-    //Current and last week GH average weight for a project
+
     @ResponseBody
-    @RequestMapping(value = "/github/team_quickweightFreq", method = RequestMethod.GET)
+    @RequestMapping(value = "/github/team_weightFreq", method = RequestMethod.GET)
     public ResponseEntity<List<WeeklyFreqWeight>> twoWeekProjectWeightFreqGH(@RequestHeader(name = "course", required = true) String course,
                                                                              @RequestHeader(name = "team", required = true) String team,
-                                                                             String weekEnding, HttpServletRequest request, HttpServletResponse response) {
-        List<WeeklyFreqWeight> weightFreqList = (List<WeeklyFreqWeight>) gitHubQueryDao.getWeightFreqByTeam(course, team);
-        return new ResponseEntity<List<WeeklyFreqWeight>>(weightFreqList, HttpStatus.OK);
+                                                                             @RequestHeader(name="weekBeginning", required=true) long weekBeginning,
+                                                                             @RequestHeader(name="weekEnding", required=true) long weekEnding,
+                                                                             HttpServletRequest request, HttpServletResponse response)
+    {
+        Course courseObj = (Course)this.courseService.read(course);
+        Date dateBegin = new Date(weekBeginning * 1000L);
+        Date dateEnd = new Date(weekEnding * 1000L);
+        SimpleDateFormat sdfBegin = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdfEnd = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDateBegin = sdfBegin.format(dateBegin);
+        String formattedDateEnd = sdfEnd.format(dateEnd);
+        String courseDateBegin = sdfBegin.format(courseObj.getStart_date());
+        String courseDateEnd = sdfEnd.format(courseObj.getEnd_date());
+        List<WeeklyFreqWeight> totalWeightFreqList = this.gitHubQueryDao.getWeeklyWeightFreqByTeam(course, team, courseDateBegin, courseDateEnd);
+        List<WeeklyFreqWeight> weightFreqList = this.gitHubQueryDao.getWeeklyWeightFreqByTeam(course, team, formattedDateBegin, formattedDateEnd);
+        double freqTot = 0.0D;
+        double weightTot = 0.0D;
+        int count = 0;
+        for (int i = 0; i < weightFreqList.size(); i++)
+        {
+            freqTot += Double.parseDouble(weightFreqList.get(i).getFrequency());
+            weightTot += Double.parseDouble(weightFreqList.get(i).getWeight());
+            count++;
+        }
+        WeeklyFreqWeight firstEntry = new WeeklyFreqWeight("1", formattedDateBegin, formattedDateEnd, String.format("%.3f", (freqTot/count)), String.format("%.3f", (weightTot/count)));
+        freqTot = 0.0D;
+        weightTot = 0.0D;
+        count = 0;
+        for (int i = 0; i < totalWeightFreqList.size(); i++)
+        {
+            freqTot += Double.parseDouble(totalWeightFreqList.get(i).getFrequency());
+            weightTot += Double.parseDouble(totalWeightFreqList.get(i).getWeight());
+            count++;
+        }
+        WeeklyFreqWeight secondEntry = new WeeklyFreqWeight("2", courseDateBegin, courseDateEnd, String.format("%.3f", (freqTot/count)), String.format("%.3f", (weightTot/count)));
+        return new ResponseEntity<List<WeeklyFreqWeight>>(new ArrayList<WeeklyFreqWeight>() {{
+            add(firstEntry);
+            add(secondEntry);
+        }}, HttpStatus.OK);
     }
 
-    //Current and last week GH average weight for a course
+
     @ResponseBody
-    @RequestMapping(value = "/github/course_quickweightFreq", method = RequestMethod.GET)
+    @RequestMapping(value = "/github/course_weightFreq", method = RequestMethod.GET)
     public ResponseEntity<List<WeeklyFreqWeight>> twoWeekCourseWeightFreqGH(@RequestHeader(name = "course", required = true) String course,
-                                                                            String weekEnding, HttpServletRequest request, HttpServletResponse response) {
-        List<WeeklyFreqWeight> weightFreqList = (List<WeeklyFreqWeight>) gitHubQueryDao.getWeightFreqByCourse(course);
-        return new ResponseEntity<List<WeeklyFreqWeight>>(weightFreqList, HttpStatus.OK);
+                                                                            @RequestHeader(name="weekBeginning", required=true) long weekBeginning,
+                                                                            @RequestHeader(name="weekEnding", required=true) long weekEnding,
+                                                                            HttpServletRequest request, HttpServletResponse response)
+    {
+        Course courseObj = (Course)this.courseService.read(course);
+        Date dateBegin = new Date(weekBeginning * 1000L);
+        Date dateEnd = new Date(weekEnding * 1000L);
+        SimpleDateFormat sdfBegin = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdfEnd = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDateBegin = sdfBegin.format(dateBegin);
+        String formattedDateEnd = sdfEnd.format(dateEnd);
+        String courseDateBegin = sdfBegin.format(courseObj.getStart_date());
+        String courseDateEnd = sdfEnd.format(courseObj.getEnd_date());
+        List<WeeklyFreqWeight> totalWeightFreqList = this.gitHubQueryDao.getWeeklyWeightFreqByCourse(course, courseDateBegin, courseDateEnd);
+        List<WeeklyFreqWeight> weightFreqList = this.gitHubQueryDao.getWeeklyWeightFreqByCourse(course, formattedDateBegin, formattedDateEnd);
+        double freqTot = 0.0D;
+        double weightTot = 0.0D;
+        int count = 0;
+        for (int i = 0; i < weightFreqList.size(); i++)
+        {
+            freqTot += Double.parseDouble(weightFreqList.get(i).getFrequency());
+            weightTot += Double.parseDouble(weightFreqList.get(i).getWeight());
+            count++;
+        }
+        WeeklyFreqWeight firstEntry = new WeeklyFreqWeight("1", formattedDateBegin, formattedDateEnd, String.format("%.3f", (freqTot/count)), String.format("%.3f", (weightTot/count)));
+        freqTot = 0.0D;
+        weightTot = 0.0D;
+        count = 0;
+        for (int i = 0; i < totalWeightFreqList.size(); i++)
+        {
+            freqTot += Double.parseDouble(totalWeightFreqList.get(i).getFrequency());
+            weightTot += Double.parseDouble(totalWeightFreqList.get(i).getWeight());
+            count++;
+        }
+        WeeklyFreqWeight secondEntry = new WeeklyFreqWeight("2", courseDateBegin, courseDateEnd, String.format("%.3f", (freqTot/count)), String.format("%.3f", (weightTot/count)));
+        return new ResponseEntity<List<WeeklyFreqWeight>>(new ArrayList<WeeklyFreqWeight>() {{
+            add(firstEntry);
+            add(secondEntry);
+        }}, HttpStatus.OK);
     }
+
     //Weekly task status averages for a student
     @ResponseBody
     @RequestMapping(value = "/taiga/student_average", method = RequestMethod.GET)
@@ -702,34 +923,130 @@ public class AppController {
         return new ResponseEntity<List<WeeklyMessageTotals>>(totalsList, HttpStatus.OK);
     }
 
-    //Weekly weights/frequencies for a student
     @ResponseBody
     @RequestMapping(value = "/slack/student_weightFreq", method = RequestMethod.GET)
-    public ResponseEntity<List<WeeklyFreqWeight>> getSlackStudentWeightFreq(@RequestHeader(name = "course", required = true) String course,
-                                                                            @RequestHeader(name = "team", required = true) String team,
-                                                                            @RequestHeader(name = "email", required = true) String email,
-                                                                            String weekEnding, HttpServletRequest request, HttpServletResponse response) {
-        List<WeeklyFreqWeight> weightFreqList = (List<WeeklyFreqWeight>) slackMessageTotalsService.weeklyWeightFreqByStudent(course, team, email);
-        return new ResponseEntity<List<WeeklyFreqWeight>>(weightFreqList, HttpStatus.OK);
+    public ResponseEntity<List<WeeklyFreqWeight>> getSlackStudentWeightFreq(@RequestHeader(name="course", required=true) String course, @RequestHeader(name="team", required=true) String team, @RequestHeader(name="email", required=true) String email, @RequestHeader(name="weekBeginning", required=true) long weekBeginning, @RequestHeader(name="weekEnding", required=true) long weekEnding, HttpServletRequest request, HttpServletResponse response)
+    {
+        Course courseObj = (Course)this.courseService.read(course);
+        Date dateBegin = new Date(weekBeginning * 1000L);
+        Date dateEnd = new Date(weekEnding * 1000L);
+        SimpleDateFormat sdfBegin = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdfEnd = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDateBegin = sdfBegin.format(dateBegin);
+        String formattedDateEnd = sdfEnd.format(dateEnd);
+        String courseDateBegin = sdfBegin.format(courseObj.getStart_date());
+        String courseDateEnd = sdfEnd.format(courseObj.getEnd_date());
+        List<WeeklyFreqWeight> totalWeightFreqList = this.slackMessageTotalsService.weeklyWeightFreqByStudent(course, team, email, courseDateBegin, courseDateEnd);
+        List<WeeklyFreqWeight> weightFreqList = this.slackMessageTotalsService.weeklyWeightFreqByStudent(course, team, email, formattedDateBegin, formattedDateEnd);
+        double freqTot = 0.0D;
+        double weightTot = 0.0D;
+        int count = 0;
+        for (int i = 0; i < weightFreqList.size(); i++)
+        {
+            freqTot += Double.parseDouble(weightFreqList.get(i).getFrequency());
+            weightTot += Double.parseDouble(weightFreqList.get(i).getWeight());
+            count++;
+        }
+        WeeklyFreqWeight firstEntry = new WeeklyFreqWeight("1", formattedDateBegin, formattedDateEnd, String.format("%.3f", (freqTot/count)), String.format("%.3f", (weightTot/count)));
+        freqTot = 0.0D;
+        weightTot = 0.0D;
+        count = 0;
+        for (int i = 0; i < totalWeightFreqList.size(); i++)
+        {
+            freqTot += Double.parseDouble(totalWeightFreqList.get(i).getFrequency());
+            weightTot += Double.parseDouble(totalWeightFreqList.get(i).getWeight());
+            count++;
+        }
+        WeeklyFreqWeight secondEntry = new WeeklyFreqWeight("2", courseDateBegin, courseDateEnd, String.format("%.3f", (freqTot/count)), String.format("%.3f", (weightTot/count)));
+        return new ResponseEntity<List<WeeklyFreqWeight>>(new ArrayList<WeeklyFreqWeight>() {{
+            add(firstEntry);
+            add(secondEntry);
+        }}, HttpStatus.OK);
     }
 
-    //Weekly average weights/frequencies for a project
     @ResponseBody
     @RequestMapping(value = "/slack/team_weightFreq", method = RequestMethod.GET)
-    public ResponseEntity<List<WeeklyFreqWeight>> getSlackTeamWeightFreq(@RequestHeader(name = "course", required = true) String course,
-                                                                         @RequestHeader(name = "team", required = true) String team,
-                                                                         String weekEnding, HttpServletRequest request, HttpServletResponse response) {
-        List<WeeklyFreqWeight> weightFreqList = (List<WeeklyFreqWeight>) slackMessageTotalsService.weeklyWeightFreqByTeam(course, team);
-        return new ResponseEntity<List<WeeklyFreqWeight>>(weightFreqList, HttpStatus.OK);
+    public ResponseEntity<List<WeeklyFreqWeight>> getSlackTeamWeightFreq(@RequestHeader(name="course", required=true) String course, @RequestHeader(name="team", required=true) String team, @RequestHeader(name="weekBeginning", required=true) long weekBeginning, @RequestHeader(name="weekEnding", required=true) long weekEnding, HttpServletRequest request, HttpServletResponse response)
+    {
+        Course courseObj = (Course)this.courseService.read(course);
+        Date dateBegin = new Date(weekBeginning * 1000L);
+        Date dateEnd = new Date(weekEnding * 1000L);
+        SimpleDateFormat sdfBegin = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdfEnd = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDateBegin = sdfBegin.format(dateBegin);
+        String formattedDateEnd = sdfEnd.format(dateEnd);
+        String courseDateBegin = sdfBegin.format(courseObj.getStart_date());
+        String courseDateEnd = sdfEnd.format(courseObj.getEnd_date());
+        List<WeeklyFreqWeight> totalWeightFreqList = this.slackMessageTotalsService.weeklyWeightFreqByTeam(course, team, courseDateBegin, courseDateEnd);
+        List<WeeklyFreqWeight> weightFreqList = this.slackMessageTotalsService.weeklyWeightFreqByTeam(course, team, formattedDateBegin, formattedDateEnd);
+        double freqTot = 0.0D;
+        double weightTot = 0.0D;
+        int count = 0;
+        for (int i = 0; i < weightFreqList.size(); i++)
+        {
+            freqTot += Double.parseDouble(weightFreqList.get(i).getFrequency());
+            weightTot += Double.parseDouble(weightFreqList.get(i).getWeight());
+            count++;
+        }
+        WeeklyFreqWeight firstEntry = new WeeklyFreqWeight("1", formattedDateBegin, formattedDateEnd, String.format("%.3f", (freqTot/count)), String.format("%.3f", (weightTot/count)));
+        freqTot = 0.0D;
+        weightTot = 0.0D;
+        count = 0;
+        for (int i = 0; i < totalWeightFreqList.size(); i++)
+        {
+            freqTot += Double.parseDouble(totalWeightFreqList.get(i).getFrequency());
+            weightTot += Double.parseDouble(totalWeightFreqList.get(i).getWeight());
+            count++;
+        }
+        WeeklyFreqWeight secondEntry = new WeeklyFreqWeight("2", courseDateBegin, courseDateEnd, String.format("%.3f", (freqTot/count)), String.format("%.3f", (weightTot/count)));
+        return new ResponseEntity<List<WeeklyFreqWeight>>(new ArrayList<WeeklyFreqWeight>() {{
+            add(firstEntry);
+            add(secondEntry);
+        }}, HttpStatus.OK);
     }
 
-    //Weekly average weights/frequencies for a course
     @ResponseBody
     @RequestMapping(value = "/slack/course_weightFreq", method = RequestMethod.GET)
-    public ResponseEntity<List<WeeklyFreqWeight>> getSlackCourseWeightFreq(@RequestHeader(name = "course", required = true) String course,
-                                                                           String weekEnding, HttpServletRequest request, HttpServletResponse response) {
-        List<WeeklyFreqWeight> weightFreqList = (List<WeeklyFreqWeight>) slackMessageTotalsService.weeklyWeightFreqByCourse(course);
-        return new ResponseEntity<List<WeeklyFreqWeight>>(weightFreqList, HttpStatus.OK);
+    public ResponseEntity<List<WeeklyFreqWeight>> getSlackCourseWeightFreq(@RequestHeader(name="course", required=true) String course,
+                                                                           @RequestHeader(name="weekBeginning", required=true) long weekBeginning,
+                                                                           @RequestHeader(name="weekEnding", required=true) long weekEnding,
+                                                                           HttpServletRequest request, HttpServletResponse response)
+    {
+        Course courseObj = (Course)this.courseService.read(course);
+        Date dateBegin = new Date(weekBeginning * 1000L);
+        Date dateEnd = new Date(weekEnding * 1000L);
+        SimpleDateFormat sdfBegin = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdfEnd = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDateBegin = sdfBegin.format(dateBegin);
+        String formattedDateEnd = sdfEnd.format(dateEnd);
+        String courseDateBegin = sdfBegin.format(courseObj.getStart_date());
+        String courseDateEnd = sdfEnd.format(courseObj.getEnd_date());
+        List<WeeklyFreqWeight> totalWeightFreqList = this.slackMessageTotalsService.weeklyWeightFreqByCourse(course, courseDateBegin, courseDateEnd);
+        List<WeeklyFreqWeight> weightFreqList = this.slackMessageTotalsService.weeklyWeightFreqByCourse(course, formattedDateBegin, formattedDateEnd);
+        double freqTot = 0.0D;
+        double weightTot = 0.0D;
+        int count = 0;
+        for (int i = 0; i < weightFreqList.size(); i++)
+        {
+            freqTot += Double.parseDouble(weightFreqList.get(i).getFrequency());
+            weightTot += Double.parseDouble(weightFreqList.get(i).getWeight());
+            count++;
+        }
+        WeeklyFreqWeight firstEntry = new WeeklyFreqWeight("1", formattedDateBegin, formattedDateEnd, String.format("%.3f", (freqTot/count)), String.format("%.3f", (weightTot/count)));
+        freqTot = 0.0D;
+        weightTot = 0.0D;
+        count = 0;
+        for (int i = 0; i < totalWeightFreqList.size(); i++)
+        {
+            freqTot += Double.parseDouble(totalWeightFreqList.get(i).getFrequency());
+            weightTot += Double.parseDouble(totalWeightFreqList.get(i).getWeight());
+            count++;
+        }
+        WeeklyFreqWeight secondEntry = new WeeklyFreqWeight("2", courseDateBegin, courseDateEnd, String.format("%.3f", (freqTot/count)), String.format("%.3f", (weightTot/count)));
+        return new ResponseEntity<List<WeeklyFreqWeight>>(new ArrayList<WeeklyFreqWeight>() {{
+            add(firstEntry);
+            add(secondEntry);
+        }}, HttpStatus.OK);
     }
 
     //Current and last week Slack weight/frequency for a student
