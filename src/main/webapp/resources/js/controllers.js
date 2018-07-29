@@ -1245,6 +1245,7 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                     //console.log(response.data);
                     $scope.courseTasks = response.data;
                     $scope.dataForTaigaCourseTasks = getDataForTaigaCourseTasks(response.data);
+                    getTaigaActivity();
                 });
                 $http({
                     url: './github/commits_course',
@@ -1276,6 +1277,7 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                     //console.log(response.data);
                     $scope.courseTasks = response.data;
                     $scope.dataForSlackCourseMessages = getDataForSlackCourseMessages(response.data);
+                    getSlackActivity();
                 }, function (response) {
                     //fail case
                     console.log("didn't work");
@@ -1294,7 +1296,7 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                     left:100
                 },
 
-                x: function(d){ return d[0]; },
+                x: function(d){ console.log('Calling this on change?'); return d[0]; },
                 y: function(d){ return d[1]; },
 
                 clipEdge: true,
@@ -2021,6 +2023,7 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                 //console.log(response.data);
                 $scope.teamTasks = response.data;
                 $scope.dataForTaigaTeamTasks = getDataForTaigaTeamTasks(response.data);
+                getTaigaActivity();
             });
             $http({
                 url: './github/commits_team',
@@ -3213,6 +3216,7 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
                     $scope.studentTasks = response.data;
                     $scope.dataForTaigaStudentTasks = getDataForTaigaStudentTasks(response.data);
+                    getTaigaActivity();
                 });
                     $http({
                         url: './github/commits_student',
@@ -3246,6 +3250,7 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                         //console.log(response.data);
                         $scope.studentMessages = response.data;
                         $scope.dataForSlackStudentMessages = getDataForSlackStudentMessages(response.data);
+                        getSlackActivity();
                     });
             }
 
