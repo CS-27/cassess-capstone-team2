@@ -9,7 +9,7 @@
 <div class="well page">
 
     <h1 class="page-header">{{courseid}} Data</h1>
-        <div style="color:black; float:right; padding-right: 130px;">
+        <div style="color:black; float:right; padding-right: 130px;" >
         <label style="color:black;">Select Start Date: </label>
         <select class="select_style"  ng-model="SelectedWeekBeginning" ng-options="x.weekBeginning for x in courseIntervals"
                 ng-change="IntervalChangedBegin(SelectedWeekBeginning.rawWeekBeginning)">
