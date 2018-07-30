@@ -41,23 +41,17 @@
             <div class="col-md-8">
                 <div class="jumbotron">
                     <div ng-show="isSet(1)">
-                        <h3>Taiga-Github-Slack Frequency/Impact</h3>
+                        <h2>Taiga-Github-Slack Frequency/Impact</h2>
                         <br>
                         <br>
-                        <label style="color: #066" >{{courseArrayTG[0].weekBeginning}}  To  {{courseArrayTG[0].weekEnding}}</label>
-                        <div ng-controller='CourseController' id="currentWeek">
-                            <canvas id="radarCurrent" class="chart chart-radar"
-                                    chart-data="currentWeekData" chart-options="currentWeekOptions" chart-labels="currentWeekLabels" chart-series="currentWeekSeries"
-                                    style="width:400px; height:400px;">
-                            </canvas>
+                        <h3>Overall Averages For: {{SelectedWeekBeginning.weekBeginning}}  To  {{SelectedWeekEnding.weekEnding}}</h3><br>
+                        <div ng-controller='CourseController' id="selectedOverall">
+                            <canvas id="radarSelected" class="chart" style="width:450px; height:400px;"></canvas>
                         </div>
                         <br>
-                        <label style="color: #066">{{courseArrayTG[1].weekBeginning}}  To  {{courseArrayTG[1].weekEnding}}</label>
-                        <div ng-controller='CourseController' id="previousWeek">
-                            <canvas id="radarPrevious" class="chart chart-radar"
-                                    chart-data="previousWeekData" chart-options="previousWeekOptions" chart-labels="previousWeekLabels" chart-series="previousWeekSeries"
-                                    style="width:400px; height:400px;">
-                            </canvas>
+                        <h3>Semester Overall Averages</h3><br>
+                        <div ng-controller='CourseController' id="totalOverall">
+                            <canvas id="radarOverall" class="chart" style="width:450px; height:400px;"></canvas>
                         </div>
                     </div>
                     <div ng-if="isSet(2)">
@@ -66,12 +60,12 @@
                         <h3>Average Task Totals</h3><br>
                         <br><br>
                         <div ng-controller='CourseController'>
-                            <nvd3 options='optionsForTaigaCourseTasks' data='dataForTaigaCourseTasks'></nvd3>
+                            <nvd3 options='optionsForTaigaCourseTasks' data='dataForTaigaCourseTasks' api="apis['taigaCourseTasks']"></nvd3>
                        <!-- </div>
 
                         <div afterRender='fireRefreshEventOnWindow()' ng-controller='CourseController'>
                            --> <h3>Task Status Update Activity</h3><br>
-                            <nvd3 options='optionsForTaigaCourseActivity' data='dataForTaigaCourseActivity'></nvd3>
+                            <nvd3 options='optionsForTaigaCourseActivity' data='dataForTaigaCourseActivity' api="apis['taigaCourseActivity']"></nvd3>
                         </div>
                     </div>
                     <div ng-if="isSet(3)">
@@ -79,9 +73,9 @@
                         <br>
                         <h3>GitHub Course Average Commit Activity</h3><br>
                       <div ng-controller='CourseController'>
-                            <nvd3 options='optionsForGitHubCourseCommits' data='dataForGitHubCourseCommits'></nvd3>
+                            <nvd3 options='optionsForGitHubCourseCommits' data='dataForGitHubCourseCommits' api="apis['githubCourseCommits']"></nvd3>
                         <h3>GitHub Course Average Weight Activity</h3><br>
-                            <nvd3 options='optionsForGitHubCourseWeight' data='dataForGitHubCourseWeight'></nvd3>
+                            <nvd3 options='optionsForGitHubCourseWeight' data='dataForGitHubCourseWeight' api="apis['githubCourseWeight']"></nvd3>
                         </div>
                     </div>
                     <div ng-if="isSet(4)">
@@ -89,11 +83,11 @@
                         <br>
                         <h3>Average Message Totals</h3><br>
                         <div ng-controller='CourseController'>
-                            <nvd3 options='optionsForSlackCourseMessages' data='dataForSlackCourseMessages'></nvd3>
+                            <nvd3 options='optionsForSlackCourseMessages' data='dataForSlackCourseMessages' api="apis['slackCourseMessages']"></nvd3>
                        <!-- </div>
                         <div afterRender='fireRefreshEventOnWindow()' ng-controller='CourseController'>
                            --> <h3>Average Message Activity</h3><br>
-                            <nvd3 options='optionsForSlackCourseActivity' data='dataForSlackCourseActivity'></nvd3>
+                            <nvd3 options='optionsForSlackCourseActivity' data='dataForSlackCourseActivity' api="apis['slackCourseActivity']"></nvd3>
                         </div>
                     </div>
                 </div>

@@ -42,23 +42,17 @@
             <div class="col-md-8">
                 <div class="jumbotron">
                     <div ng-show="isSet(1)">
-                        <h3>Taiga-Github-Slack Frequency/Impact</h3>
+                        <h2>Taiga-Github-Slack Frequency/Impact</h2>
                         <br>
                         <br>
-                        <label style="color: #066" >{{studentArrayTG[0].weekBeginning}}  To  {{studentArrayTG[0].weekEnding}}</label>
-                        <div ng-controller='StudentController' id="currentWeek">
-                            <canvas id="radarCurrent" class="chart chart-radar"
-                                    chart-data="currentWeekData" chart-options="currentWeekOptions" chart-labels="currentWeekLabels" chart-series="currentWeekSeries"
-                                    style="width:400px; height:400px;">
-                            </canvas>
+                        <h3>Overall Averages For: {{SelectedWeekBeginning.weekBeginning}}  To  {{SelectedWeekEnding.weekEnding}}</h3><br>
+                        <div ng-controller='StudentController' id="selectedOverall">
+                            <canvas id="radarSelected" class="chart" style="width:450px; height:400px;"></canvas>
                         </div>
                         <br>
-                        <label style="color: #066">{{studentArrayTG[1].weekBeginning}}  To  {{studentArrayTG[1].weekEnding}}</label>
-                        <div ng-controller='StudentController' id="previousWeek">
-                            <canvas id="radarPrevious" class="chart chart-radar"
-                                    chart-data="previousWeekData" chart-options="previousWeekOptions" chart-labels="previousWeekLabels" chart-series="previousWeekSeries"
-                                    style="width:400px; height:400px;">
-                            </canvas>
+                        <h3>Semester Overall Averages</h3><br>
+                        <div ng-controller='StudentController' id="totalOverall">
+                            <canvas id="radarOverall" class="chart" style="width:450px; height:400px;"></canvas>
                         </div>
                     </div>
                     <div ng-if="isSet(2)">

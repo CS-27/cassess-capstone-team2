@@ -942,6 +942,7 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
     }])
     .controller('CourseController', ['$scope', '$rootScope', '$routeParams', '$location', 'courseService', 'userService', '$http', function ($scope, $rootScope, $routeParams, $location, courseService, userService, $http) {
+        var initial;
         if ($routeParams.course_id != null) {
             $scope.courseid = $routeParams.course_id;
         } else {
@@ -962,15 +963,20 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
             if (response.data == false) {
                 $location.path('/home');
             } else {
-                getTaigaWeightFreq();
+                initial = true;
+                getGithubIntervals();
             }
         });
 
         function getTaigaWeightFreq() {
             $http({
-                url: './taiga/course_quickweightFreq',
+                url: './taiga/course_weightFreq',
                 method: "GET",
-                headers: {'course': $scope.courseid}
+                headers: {
+                    'course': $scope.courseid,
+                    'weekBeginning': $rootScope.rawWeekBeginning,
+                    'weekEnding': $rootScope.rawWeekEnding
+                }
             }).then(function (response) {
                 $scope.courseArrayTG = response.data;
                 getGitHubWeightFreq();
@@ -983,9 +989,13 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
         function getGitHubWeightFreq() {
             $http({
-                url: './github/course_quickweightFreq',
+                url: './github/course_weightFreq',
                 method: "GET",
-                headers: {'course': $scope.courseid}
+                headers: {
+                    'course': $scope.courseid,
+                    'weekBeginning': $rootScope.rawWeekBeginning,
+                    'weekEnding': $rootScope.rawWeekEnding
+                }
             }).then(function (response) {
                 $scope.courseArrayGH = response.data;
                 getSlackWeightFreq();
@@ -998,9 +1008,13 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
         function getSlackWeightFreq() {
             $http({
-                url: './slack/course_quickweightFreq',
+                url: './slack/course_weightFreq',
                 method: "GET",
-                headers: {'course': $scope.courseid}
+                headers: {
+                    'course': $scope.courseid,
+                    'weekBeginning': $rootScope.rawWeekBeginning,
+                    'weekEnding': $rootScope.rawWeekEnding
+                }
             }).then(function (response) {
                 $scope.courseArraySK = response.data;
                 plotCurrentWeek();
@@ -1035,23 +1049,95 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                 $scope.courseFrequencySK0 = $scope.courseArraySK[0].frequency;
             }
 
-            $scope.currentWeekLabels = ['Taiga Impact', 'Taiga Freq', 'GH Impact', 'GH Freq', 'Slack Impact', 'Slack Freq'];
-            $scope.currentWeekOptions = { legend: { display: true }};
-            $scope.currentWeekSeries = ["Course"];
-            $scope.currentWeekData = [
-                [$scope.courseWeightTG0, $scope.courseFrequencyTG0, $scope.courseWeightGH0, $scope.courseFrequencyGH0, $scope.courseWeightSK0, $scope.courseFrequencySK0]
-            ];
+            $scope.selectedWeekLabels = ['Taiga Impact', 'Taiga Freq', 'GH Impact', 'GH Freq', 'Slack Impact', 'Slack Freq'];
+            $scope.selectedWeekSeries = "Course";
+            $scope.selectedWeekData = [$scope.courseWeightTG0, $scope.courseFrequencyTG0, $scope.courseWeightGH0, $scope.courseFrequencyGH0, $scope.courseWeightSK0, $scope.courseFrequencySK0];
 
-            if($scope.courseArrayTG[1]){
-                if($scope.courseArrayTG[1].weekEnding != null){
-                    plotPreviousWeek();
-                } else {
-                    getTaigaActivity();
-                }
+            if(initial){
+                //console.log("Initial Run for Selected Chart");
+                var selectedOverallCtx = $("#radarSelected").get(0).getContext("2d");
+                $scope.selectedOverallChart = new Chart(selectedOverallCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: $scope.selectedWeekLabels,
+                        datasets: [{
+                            fill: 'origin',
+                            backgroundColor:'rgb(228, 98, 98,.25)',
+                            borderColor: 'rgb(228, 98, 98)',
+                            borderWidth: 2,
+                            label: $scope.selectedWeekSeries,
+                            data: $scope.selectedWeekData,
+                            pointRadius: 3,
+                            pointBorderWidth: 2,
+                            pointBackgroundColor: 'rgb(228, 98, 98,.25)',
+                            pointBorderColor: 'rgb(228, 98, 98)',
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        maintainAspectRatio: true,
+                        legend: {
+                            display: true
+                        },
+                        scale: {
+                            ticks: {
+                                beginAtZero: true,
+                                min: 0,
+                                max: 3,
+                                stepSize: .5
+                            },
+                            pointLabels: {
+                                fontSize: 14
+                            }
+                        }
+                    }
+                });
+                initial = false;
+                plotPreviousWeek();
             } else {
-                getTaigaActivity();
+                //console.log("Not Initial Run for Selected Chart");
+                $('#radarSelected').remove();
+                $('#selectedOverall').append('<canvas id="radarSelected" class="chart" style="width:400px; height:400px;"></canvas>');
+                var selectedOverallCtx = $("#radarSelected").get(0).getContext("2d");
+                $scope.selectedOverallChart = new Chart(selectedOverallCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: $scope.selectedWeekLabels,
+                        datasets: [{
+                            fill: 'origin',
+                            backgroundColor:'rgb(228, 98, 98,.25)',
+                            borderColor: 'rgb(228, 98, 98)',
+                            borderWidth: 2,
+                            label: $scope.selectedWeekSeries,
+                            data: $scope.selectedWeekData,
+                            pointRadius: 3,
+                            pointBorderWidth: 2,
+                            pointBackgroundColor: 'rgb(228, 98, 98,.25)',
+                            pointBorderColor: 'rgb(228, 98, 98)',
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        maintainAspectRatio: true,
+                        legend: {
+                            display: true
+                        },
+                        scale: {
+                            ticks: {
+                                beginAtZero: true,
+                                min: 0,
+                                max: 3,
+                                stepSize: .5
+                            },
+                            pointLabels: {
+                                fontSize: 14
+                            }
+                        }
+                    }
+                });
             }
-
         }
 
         function plotPreviousWeek() {
@@ -1078,14 +1164,48 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                 $scope.courseFrequencySK1 = $scope.courseArraySK[1].frequency;
             }
 
-            $scope.previousWeekLabels = ['Taiga Impact', 'Taiga Freq', 'GH Impact', 'GH Freq', 'Slack Impact', 'Slack Freq'];
-            $scope.previousWeekOptions = { legend: { display: true }};
-            $scope.previousWeekSeries = ["Course"];
-            $scope.previousWeekData = [
-                [$scope.courseWeightTG1, $scope.courseFrequencyTG1, $scope.courseWeightGH1, $scope.courseFrequencyGH1, $scope.courseWeightSK1, $scope.courseFrequencySK1]
-            ];
+            $scope.overallWeekLabels = ['Taiga Impact', 'Taiga Freq', 'GH Impact', 'GH Freq', 'Slack Impact', 'Slack Freq'];
+            $scope.overallWeekSeries = "Course";
+            $scope.overallWeekData = [$scope.courseWeightTG1, $scope.courseFrequencyTG1, $scope.courseWeightGH1, $scope.courseFrequencyGH1, $scope.courseWeightSK1, $scope.courseFrequencySK1];
 
-            getTaigaActivity();
+            var totalOverallCtx = $("#radarOverall").get(0).getContext("2d");
+            $scope.totalOverallChart = new Chart(totalOverallCtx, {
+                type: 'radar',
+                data: {
+                    labels: $scope.overallWeekLabels,
+                    datasets: [{
+                        fill: 'origin',
+                        backgroundColor: 'rgb(228, 98, 98,.25)',
+                        borderColor: 'rgb(228, 98, 98)',
+                        borderWidth: 2,
+                        label: $scope.overallWeekSeries,
+                        data: $scope.overallWeekData,
+                        pointRadius: 3,
+                        pointBorderWidth: 2,
+                        pointBackgroundColor: 'rgb(228, 98, 98,.25)',
+                        pointBorderColor: 'rgb(228, 98, 98)',
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    maintainAspectRatio: true,
+                    legend: {
+                        display: true
+                    },
+                    scale: {
+                        ticks: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: 3,
+                            stepSize: .5
+                        },
+                        pointLabels: {
+                            fontSize: 14
+                        }
+                    }
+                }
+            });
         }
 
         function getTaigaActivity() {
@@ -1098,12 +1218,10 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                 //console.log("Worked!");
                 //console.log(response.data);
                 $scope.courseActivity = response.data;
-                getGithubIntervals();
                 $scope.dataForTaigaCourseActivity =  getDataForCourseTaigaActivityCharts(response.data);
             }, function (response) {
                 //fail case
                 console.log("didn't work");
-                getGithubIntervals();
             });
         }
 
@@ -1232,6 +1350,7 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                 getAllTabsData();
             }}
         function getAllTabsData(){
+            getTaigaWeightFreq();
                 $http({
                     url: './taiga/course_tasks',
                     method: "GET",
@@ -1671,6 +1790,7 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
     }])
     .controller('TeamController', ['$scope', '$rootScope','$location', '$routeParams', 'courseService', 'teamService', 'userService', '$http', function ($scope, $rootScope, $location, $routeParams, courseService, teamService, userService, $http) {
         $scope.teamid = $routeParams.team_id;
+        var initial;
         var course = courseService.getCourse();
         $scope.courseid = courseService.getCourse();
         if (course == null) {
@@ -1703,15 +1823,19 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
             if (response.data == false) {
                 $location.path('/home');
             } else {
-                getTaigaCourseWeightFreq();
+                initial = true;
+                getGithubIntervals();
             }
         });
 
         function getTaigaCourseWeightFreq() {
             $http({
-                url: './taiga/course_quickweightFreq',
+                url: './taiga/course_weightFreq',
                 method: "GET",
-                headers: {'course': course}
+                headers: {'course': course,
+                    'weekBeginning': $rootScope.rawWeekBeginning,
+                    'weekEnding': $rootScope.rawWeekEnding
+                }
             }).then(function (response) {
                 $scope.courseArrayTG = response.data;
                 getGitHubCourseWeightFreq();
@@ -1724,9 +1848,12 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
         function getGitHubCourseWeightFreq() {
             $http({
-                url: './github/course_quickweightFreq',
+                url: './github/course_weightFreq',
                 method: "GET",
-                headers: {'course': course}
+                headers: {'course': course,
+                    'weekBeginning': $rootScope.rawWeekBeginning,
+                    'weekEnding': $rootScope.rawWeekEnding
+                }
             }).then(function (response) {
                 $scope.courseArrayGH = response.data;
                 getSlackCourseWeightFreq();
@@ -1739,9 +1866,12 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
         function getSlackCourseWeightFreq() {
             $http({
-                url: './slack/course_quickweightFreq',
+                url: './slack/course_weightFreq',
                 method: "GET",
-                headers: {'course': course}
+                headers: {'course': course,
+                    'weekBeginning': $rootScope.rawWeekBeginning,
+                    'weekEnding': $rootScope.rawWeekEnding
+                }
             }).then(function (response) {
                 $scope.courseArraySK = response.data;
                 getTaigaTeamWeightFreq();
@@ -1754,9 +1884,12 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
         function getTaigaTeamWeightFreq() {
             $http({
-                url: './taiga/team_quickweightFreq',
+                url: './taiga/team_weightFreq',
                 method: "GET",
-                headers: {'course': course, 'team': $scope.teamid}
+                headers: {'course': course, 'team': $scope.teamid,
+                    'weekBeginning': $rootScope.rawWeekBeginning,
+                    'weekEnding': $rootScope.rawWeekEnding
+                }
             }).then(function (response) {
                 $scope.teamArrayTG = response.data;
                 getGitHubTeamWeightFreq();
@@ -1769,9 +1902,12 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
         function getGitHubTeamWeightFreq() {
             $http({
-                url: './github/team_quickweightFreq',
+                url: './github/team_weightFreq',
                 method: "GET",
-                headers: {'course': course, 'team': $scope.teamid}
+                headers: {'course': course, 'team': $scope.teamid,
+                    'weekBeginning': $rootScope.rawWeekBeginning,
+                    'weekEnding': $rootScope.rawWeekEnding
+                }
             }).then(function (response) {
                 $scope.teamArrayGH = response.data;
                 getSlackTeamWeightFreq();
@@ -1784,9 +1920,12 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
         function getSlackTeamWeightFreq() {
             $http({
-                url: './slack/team_quickweightFreq',
+                url: './slack/team_weightFreq',
                 method: "GET",
-                headers: {'course': course, 'team': $scope.teamid}
+                headers: {'course': course, 'team': $scope.teamid,
+                    'weekBeginning': $rootScope.rawWeekBeginning,
+                    'weekEnding': $rootScope.rawWeekEnding
+                }
             }).then(function (response) {
                 $scope.teamArraySK = response.data;
                 plotCurrentWeek();
@@ -1842,22 +1981,125 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                 $scope.teamFrequencySK0 = $scope.teamArraySK[0].frequency;
             }
 
-            $scope.currentWeekLabels = ['Taiga Impact', 'Taiga Freq', 'GH Impact', 'GH Freq', 'Slack Impact', 'Slack Freq'];
-            $scope.currentWeekOptions = { legend: { display: true }};
-            $scope.currentWeekSeries = ["Course", "Team"];
-            $scope.currentWeekData = [
+            $scope.selectedWeekLabels = ['Taiga Impact', 'Taiga Freq', 'GH Impact', 'GH Freq', 'Slack Impact', 'Slack Freq'];
+            $scope.selectedWeekOptions = { legend: { display: true }};
+            $scope.selectedWeekSeries1 = "Course";
+            $scope.selectedWeekSeries2 = "Team";
+            $scope.selectedWeekData = [
                 [$scope.courseWeightTG0, $scope.courseFrequencyTG0, $scope.courseWeightGH0, $scope.courseFrequencyGH0, $scope.courseWeightSK0, $scope.courseFrequencySK0],
                 [$scope.teamWeightTG0, $scope.teamFrequencyTG0, $scope.teamWeightGH0, $scope.teamFrequencyGH0, $scope.teamWeightSK0, $scope.teamFrequencySK0]
             ];
 
-            if($scope.teamArrayTG[1]){
-                if($scope.teamArrayTG[1].weekEnding != null){
-                    plotPreviousWeek();
-                } else {
-                    getTaigaActivity();
-                }
+            if(initial){
+                //console.log("Initial Run for Selected Chart");
+                var selectedOverallCtx = $("#radarSelected").get(0).getContext("2d");
+                $scope.selectedOverallChart = new Chart(selectedOverallCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: $scope.selectedWeekLabels,
+                        datasets: [{
+                            fill: 'origin',
+                            backgroundColor:'rgb(228, 98, 98, .25)',
+                            borderColor: 'rgb(228, 98, 98)',
+                            borderWidth: 2,
+                            label: $scope.selectedWeekSeries1,
+                            data: $scope.selectedWeekData[0],
+                            pointRadius: 3,
+                            pointBorderWidth: 2,
+                            pointBackgroundColor: 'rgb(228, 98, 98, .25)',
+                            pointBorderColor: 'rgb(228, 98, 98)',
+                            pointHoverRadius: 6
+                        },
+                            {
+                                fill: 'origin',
+                                backgroundColor:'rgb(42, 137, 232, .25)',
+                                borderColor: 'rgb(42, 137, 232)',
+                                borderWidth: 2,
+                                label: $scope.selectedWeekSeries2,
+                                data: $scope.selectedWeekData[1],
+                                pointRadius: 3,
+                                pointBorderWidth: 2,
+                                pointBackgroundColor: 'rgb(42, 137, 232, .25)',
+                                pointBorderColor: 'rgb(42, 137, 232)',
+                                pointHoverRadius: 6
+                            }]
+                    },
+                    options: {
+                        responsive: false,
+                        maintainAspectRatio: true,
+                        legend: {
+                            display: true
+                        },
+                        scale: {
+                            ticks: {
+                                beginAtZero: true,
+                                min: 0,
+                                max: 3,
+                                stepSize: .5
+                            },
+                            pointLabels: {
+                                fontSize: 14
+                            }
+                        }
+                    }
+                });
+                initial = false;
+                plotPreviousWeek();
             } else {
-                getTaigaActivity();
+                //console.log("Not Initial Run for Selected Chart");
+                $('#radarSelected').remove();
+                $('#selectedOverall').append('<canvas id="radarSelected" class="chart" style="width:400px; height:400px;"></canvas>');
+                var selectedOverallCtx = $("#radarSelected").get(0).getContext("2d");
+                $scope.selectedOverallChart = new Chart(selectedOverallCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: $scope.selectedWeekLabels,
+                        datasets: [{
+                            fill: 'origin',
+                            backgroundColor:'rgb(228, 98, 98, .25)',
+                            borderColor: 'rgb(228, 98, 98)',
+                            borderWidth: 2,
+                            label: $scope.selectedWeekSeries1,
+                            data: $scope.selectedWeekData[0],
+                            pointRadius: 3,
+                            pointBorderWidth: 2,
+                            pointBackgroundColor: 'rgb(228, 98, 98, .25)',
+                            pointBorderColor: 'rgb(228, 98, 98)',
+                            pointHoverRadius: 6
+                        },
+                            {
+                                fill: 'origin',
+                                backgroundColor:'rgb(42, 137, 232, .25)',
+                                borderColor: 'rgb(42, 137, 232)',
+                                borderWidth: 2,
+                                label: $scope.selectedWeekSeries2,
+                                data: $scope.selectedWeekData[1],
+                                pointRadius: 3,
+                                pointBorderWidth: 2,
+                                pointBackgroundColor: 'rgb(42, 137, 232, .25)',
+                                pointBorderColor: 'rgb(42, 137, 232)',
+                                pointHoverRadius: 6
+                            }]
+                    },
+                    options: {
+                        responsive: false,
+                        maintainAspectRatio: true,
+                        legend: {
+                            display: true
+                        },
+                        scale: {
+                            ticks: {
+                                beginAtZero: true,
+                                min: 0,
+                                max: 3,
+                                stepSize: .5
+                            },
+                            pointLabels: {
+                                fontSize: 14
+                            }
+                        }
+                    }
+                });
             }
         }
 
@@ -1907,15 +2149,65 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
             }
 
 
-            $scope.previousWeekLabels = ['Taiga Impact', 'Taiga Freq', 'GH Impact', 'GH Freq', 'Slack Impact', 'Slack Freq'];
-            $scope.previousWeekOptions = { legend: { display: true }};
-            $scope.previousWeekSeries = ["Course", "Team"];
-            $scope.previousWeekData = [
+            $scope.overallWeekLabels = ['Taiga Impact', 'Taiga Freq', 'GH Impact', 'GH Freq', 'Slack Impact', 'Slack Freq'];
+            $scope.overallWeekSeries1 = "Course";
+            $scope.overallWeekSeries2 = "Team";
+            $scope.overallWeekData = [
                 [$scope.courseWeightTG1, $scope.courseFrequencyTG1, $scope.courseWeightGH1, $scope.courseFrequencyGH1, $scope.courseWeightSK1, $scope.courseFrequencySK1],
                 [$scope.teamWeightTG1, $scope.teamFrequencyTG1, $scope.teamWeightGH1, $scope.teamFrequencyGH1, $scope.teamWeightSK1, $scope.teamFrequencySK1]
             ];
 
-            getTaigaActivity();
+            var totalOverallCtx = $("#radarOverall").get(0).getContext("2d");
+            $scope.totalOverallChart = new Chart(totalOverallCtx, {
+                type: 'radar',
+                data: {
+                    labels: $scope.overallWeekLabels,
+                    datasets: [{
+                        fill: 'origin',
+                        backgroundColor:'rgb(228, 98, 98, .25)',
+                        borderColor: 'rgb(228, 98, 98)',
+                        borderWidth: 2,
+                        label: $scope.overallWeekSeries1,
+                        data: $scope.overallWeekData[0],
+                        pointRadius: 3,
+                        pointBorderWidth: 2,
+                        pointBackgroundColor: 'rgb(228, 98, 98, .25)',
+                        pointBorderColor: 'rgb(228, 98, 98)',
+                        pointHoverRadius: 6
+                    },
+                        {
+                            fill: 'origin',
+                            backgroundColor:'rgb(42, 137, 232, .25)',
+                            borderColor: 'rgb(42, 137, 232)',
+                            borderWidth: 2,
+                            label: $scope.overallWeekSeries2,
+                            data: $scope.overallWeekData[1],
+                            pointRadius: 3,
+                            pointBorderWidth: 2,
+                            pointBackgroundColor: 'rgb(42, 137, 232, .25)',
+                            pointBorderColor: 'rgb(42, 137, 232)',
+                            pointHoverRadius: 6
+                        }]
+                },
+                options: {
+                    responsive: false,
+                    maintainAspectRatio: true,
+                    legend: {
+                        display: true
+                    },
+                    scale: {
+                        ticks: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: 3,
+                            stepSize: .5
+                        },
+                        pointLabels: {
+                            fontSize: 14
+                        }
+                    }
+                }
+            });
         }
 
 
@@ -2009,6 +2301,7 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
             }
         };
         function getAllTeamTabsData(){
+            getTaigaCourseWeightFreq();
             $http({
                 url: './taiga/team_tasks',
                 method: "GET",
@@ -2127,12 +2420,10 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                 //console.log("Worked!");
                 //console.log(response.data);
                 $scope.teamActivity = response.data;
-                getGithubIntervals();
                 $scope.dataForTaigaTeamActivity = getDataForTeamTaigaActivityCharts(response.data);
             }, function (response) {
                 //fail case
                 console.log("didn't work: " + response.data);
-                getGithubIntervals();
             });
         }
 
@@ -2712,6 +3003,7 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
         $scope.studentid = $routeParams.student_id;
         $scope.courseid = courseService.getCourse();
         $scope.teamid = teamService.getTeam();
+        var initial;
 		var course = courseService.getCourse();
         var team = teamService.getTeam();
         var studentemail = studentService.getStudentEmail();
@@ -2751,15 +3043,19 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
             if (response.data == false) {
                 $location.path('/home');
             } else {
-                getTaigaCourseWeightFreq();
+                initial = true;
+                getGithubIntervals();
             }
         });
 
         function getTaigaCourseWeightFreq() {
             $http({
-                url: './taiga/course_quickweightFreq',
+                url: './taiga/course_weightFreq',
                 method: "GET",
-                headers: {'course': course}
+                headers: {'course': course,
+                    'weekBeginning': $rootScope.rawWeekBeginning,
+                    'weekEnding': $rootScope.rawWeekEnding
+                }
             }).then(function (response) {
                 $scope.courseArrayTG = response.data;
                 getGitHubCourseWeightFreq();
@@ -2772,9 +3068,12 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
         function getGitHubCourseWeightFreq() {
             $http({
-                url: './github/course_quickweightFreq',
+                url: './github/course_weightFreq',
                 method: "GET",
-                headers: {'course': course}
+                headers: {'course': course,
+                    'weekBeginning': $rootScope.rawWeekBeginning,
+                    'weekEnding': $rootScope.rawWeekEnding
+                }
             }).then(function (response) {
                 $scope.courseArrayGH = response.data;
                 getSlackCourseWeightFreq();
@@ -2787,9 +3086,12 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
         function getSlackCourseWeightFreq() {
             $http({
-                url: './slack/course_quickweightFreq',
+                url: './slack/course_weightFreq',
                 method: "GET",
-                headers: {'course': course}
+                headers: {'course': course,
+                    'weekBeginning': $rootScope.rawWeekBeginning,
+                    'weekEnding': $rootScope.rawWeekEnding
+                }
             }).then(function (response) {
                 $scope.courseArraySK = response.data;
                 getTaigaTeamWeightFreq();
@@ -2802,9 +3104,12 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
         function getTaigaTeamWeightFreq() {
             $http({
-                url: './taiga/team_quickweightFreq',
+                url: './taiga/team_weightFreq',
                 method: "GET",
-                headers: {'course': course, 'team': team}
+                headers: {'course': course, 'team': team,
+                    'weekBeginning': $rootScope.rawWeekBeginning,
+                    'weekEnding': $rootScope.rawWeekEnding
+                }
             }).then(function (response) {
                 $scope.teamArrayTG = response.data;
                 getGitHubTeamWeightFreq();
@@ -2817,9 +3122,12 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
         function getGitHubTeamWeightFreq() {
             $http({
-                url: './github/team_quickweightFreq',
+                url: './github/team_weightFreq',
                 method: "GET",
-                headers: {'course': course, 'team': team}
+                headers: {'course': course, 'team': team,
+                    'weekBeginning': $rootScope.rawWeekBeginning,
+                    'weekEnding': $rootScope.rawWeekEnding
+                }
             }).then(function (response) {
                 $scope.teamArrayGH = response.data;
                 getSlackTeamWeightFreq();
@@ -2832,9 +3140,12 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
         function getSlackTeamWeightFreq() {
             $http({
-                url: './slack/team_quickweightFreq',
+                url: './slack/team_weightFreq',
                 method: "GET",
-                headers: {'course': course, 'team': team}
+                headers: {'course': course, 'team': team,
+                    'weekBeginning': $rootScope.rawWeekBeginning,
+                    'weekEnding': $rootScope.rawWeekEnding
+                }
             }).then(function (response) {
                 $scope.teamArraySK = response.data;
                 getTaigaStudentWeightFreq();
@@ -2847,9 +3158,12 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
         function getTaigaStudentWeightFreq() {
             $http({
-                url: './taiga/student_quickweightFreq',
+                url: './taiga/student_weightFreq',
                 method: "GET",
-                headers: {'course': course, 'team': team, 'email': studentemail}
+                headers: {'course': course, 'team': team, 'email': studentemail,
+                    'weekBeginning': $rootScope.rawWeekBeginning,
+                    'weekEnding': $rootScope.rawWeekEnding
+                }
             }).then(function (response) {
                 $scope.studentArrayTG = response.data;
                 getGitHubStudentWeightFreq();
@@ -2862,9 +3176,12 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
         function getGitHubStudentWeightFreq() {
             $http({
-                url: './github/student_quickweightFreq',
+                url: './github/student_weightFreq',
                 method: "GET",
-                headers: {'course': course, 'team': team, 'email': studentemail}
+                headers: {'course': course, 'team': team, 'email': studentemail,
+                    'weekBeginning': $rootScope.rawWeekBeginning,
+                    'weekEnding': $rootScope.rawWeekEnding
+                }
             }).then(function (response) {
                 $scope.studentArrayGH = response.data;
                 getSlackStudentWeightFreq();
@@ -2877,9 +3194,12 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
         function getSlackStudentWeightFreq() {
             $http({
-                url: './slack/student_quickweightFreq',
+                url: './slack/student_weightFreq',
                 method: "GET",
-                headers: {'course': course, 'team': team, 'email': studentemail}
+                headers: {'course': course, 'team': team, 'email': studentemail,
+                    'weekBeginning': $rootScope.rawWeekBeginning,
+                    'weekEnding': $rootScope.rawWeekEnding
+                }
             }).then(function (response) {
                 //console.log("Slack");
                 //console.log(response.data);
@@ -2894,9 +3214,6 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
         function plotCurrentWeek() {
 
-            $scope.currentWeekLabels = ['Taiga Impact', 'Taiga Freq', 'GH Impact', 'GH Freq', 'Slack Impact', 'Slack Freq'];
-            $scope.currentWeekOptions = { legend: { display: true }};
-            $scope.currentWeekSeries = ["Course", "Team", "Student"];
             if($scope.courseArrayTG[0] == null){
                 $scope.courseWeightTG0 = 0;
                 $scope.courseFrequencyTG0 = 0;
@@ -2960,24 +3277,158 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                 $scope.studentWeightSK0 = $scope.studentArraySK[0].weight;
                 $scope.studentFrequencySK0 = $scope.studentArraySK[0].frequency;
             }
-            $scope.currentWeekData = [
+            $scope.selectedWeekLabels = ['Taiga Impact', 'Taiga Freq', 'GH Impact', 'GH Freq', 'Slack Impact', 'Slack Freq'];
+            $scope.selectedWeekOptions = { legend: { display: true }};
+            $scope.selectedWeekSeries1 = "Course";
+            $scope.selectedWeekSeries2 = "Team";
+            $scope.selectedWeekSeries3 = "Student";
+            $scope.selectedWeekData = [
                 [$scope.courseWeightTG0, $scope.courseFrequencyTG0, $scope.courseWeightGH0, $scope.courseFrequencyGH0, $scope.courseWeightSK0, $scope.courseFrequencySK0],
                 [$scope.teamWeightTG0, $scope.teamFrequencyTG0, $scope.teamWeightGH0, $scope.teamFrequencyGH0, $scope.teamWeightSK0, $scope.teamFrequencySK0],
                 [$scope.studentWeightTG0, $scope.studentFrequencyTG0, $scope.studentWeightGH0, $scope.studentFrequencyGH0, $scope.studentWeightSK0, $scope.studentFrequencySK0]
             ];
 
-            if($scope.studentArrayTG[1]){
-                if($scope.studentArrayTG[1].weekEnding != null){
-                    plotPreviousWeek();
-                } else {
-                    getTaigaActivity();
-                }
+            if(initial){
+                //console.log("Initial Run for Selected Chart");
+                var selectedOverallCtx = $("#radarSelected").get(0).getContext("2d");
+                $scope.selectedOverallChart = new Chart(selectedOverallCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: $scope.selectedWeekLabels,
+                        datasets: [{
+                            fill: 'origin',
+                            backgroundColor:'rgb(228, 98, 98, .25)',
+                            borderColor: 'rgb(228, 98, 98)',
+                            borderWidth: 2,
+                            label: $scope.selectedWeekSeries1,
+                            data: $scope.selectedWeekData[0],
+                            pointRadius: 3,
+                            pointBorderWidth: 2,
+                            pointBackgroundColor: 'rgb(228, 98, 98, .25)',
+                            pointBorderColor: 'rgb(228, 98, 98)',
+                            pointHoverRadius: 6
+                        },
+                            {
+                                fill: 'origin',
+                                backgroundColor:'rgb(42, 137, 232, .25)',
+                                borderColor: 'rgb(42, 137, 232)',
+                                borderWidth: 2,
+                                label: $scope.selectedWeekSeries2,
+                                data: $scope.selectedWeekData[1],
+                                pointRadius: 3,
+                                pointBorderWidth: 2,
+                                pointBackgroundColor: 'rgb(42, 137, 232, .25)',
+                                pointBorderColor: 'rgb(42, 137, 232)',
+                                pointHoverRadius: 6
+                            },
+                            {
+                                fill: 'origin',
+                                backgroundColor:'rgb(68, 202, 135, .25)',
+                                borderColor: 'rgb(68, 202, 135)',
+                                borderWidth: 2,
+                                label: $scope.selectedWeekSeries3,
+                                data: $scope.selectedWeekData[2],
+                                pointRadius: 3,
+                                pointBorderWidth: 2,
+                                pointBackgroundColor: 'rgb(68, 202, 135, .25)',
+                                pointBorderColor: 'rgb(68, 202, 135)',
+                                pointHoverRadius: 6
+                            }]
+                    },
+                    options: {
+                        responsive: false,
+                        maintainAspectRatio: true,
+                        legend: {
+                            display: true
+                        },
+                        scale: {
+                            ticks: {
+                                beginAtZero: true,
+                                min: 0,
+                                max: 3,
+                                stepSize: .5
+                            },
+                            pointLabels: {
+                                fontSize: 14
+                            }
+                        }
+                    }
+                });
+                initial = false;
+                plotPreviousWeek();
             } else {
-                getTaigaActivity();
+                //console.log("Not Initial Run for Selected Chart");
+                $('#radarSelected').remove();
+                $('#selectedOverall').append('<canvas id="radarSelected" class="chart" style="width:400px; height:400px;"></canvas>');
+                var selectedOverallCtx = $("#radarSelected").get(0).getContext("2d");
+                $scope.selectedOverallChart = new Chart(selectedOverallCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: $scope.selectedWeekLabels,
+                        datasets: [{
+                            fill: 'origin',
+                            backgroundColor:'rgb(228, 98, 98, .25)',
+                            borderColor: 'rgb(228, 98, 98)',
+                            borderWidth: 2,
+                            label: $scope.selectedWeekSeries1,
+                            data: $scope.selectedWeekData[0],
+                            pointRadius: 3,
+                            pointBorderWidth: 2,
+                            pointBackgroundColor: 'rgb(228, 98, 98, .25)',
+                            pointBorderColor: 'rgb(228, 98, 98)',
+                            pointHoverRadius: 6
+                        },
+                            {
+                                fill: 'origin',
+                                backgroundColor:'rgb(42, 137, 232, .25)',
+                                borderColor: 'rgb(42, 137, 232)',
+                                borderWidth: 2,
+                                label: $scope.selectedWeekSeries2,
+                                data: $scope.selectedWeekData[1],
+                                pointRadius: 3,
+                                pointBorderWidth: 2,
+                                pointBackgroundColor: 'rgb(42, 137, 232, .25)',
+                                pointBorderColor: 'rgb(42, 137, 232)',
+                                pointHoverRadius: 6
+                            },
+                            {
+                                fill: 'origin',
+                                backgroundColor:'rgb(68, 202, 135, .25)',
+                                borderColor: 'rgb(68, 202, 135)',
+                                borderWidth: 2,
+                                label: $scope.selectedWeekSeries3,
+                                data: $scope.selectedWeekData[2],
+                                pointRadius: 3,
+                                pointBorderWidth: 2,
+                                pointBackgroundColor: 'rgb(68, 202, 135, .25)',
+                                pointBorderColor: 'rgb(68, 202, 135)',
+                                pointHoverRadius: 6
+                            }]
+                    },
+                    options: {
+                        responsive: false,
+                        maintainAspectRatio: true,
+                        legend: {
+                            display: true
+                        },
+                        scale: {
+                            ticks: {
+                                beginAtZero: true,
+                                min: 0,
+                                max: 3,
+                                stepSize: .5
+                            },
+                            pointLabels: {
+                                fontSize: 14
+                            }
+                        }
+                    }
+                });
             }
         }
 
         function plotPreviousWeek() {
+
             if($scope.courseArrayTG[1] == null){
                 $scope.courseWeightTG1 = 0;
                 $scope.courseFrequencyTG1 = 0;
@@ -3042,16 +3493,80 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                 $scope.studentFrequencySK1 = $scope.studentArraySK[1].frequency;
             }
 
-            $scope.previousWeekLabels = ['Taiga Impact', 'Taiga Freq', 'GH Impact', 'GH Freq', 'Slack Impact', 'Slack Freq'];
-            $scope.previousWeekOptions = { legend: { display: true }};
-            $scope.previousWeekSeries = ["Course", "Team", "Student"];
-            $scope.previousWeekData = [
+            $scope.overallWeekLabels = ['Taiga Impact', 'Taiga Freq', 'GH Impact', 'GH Freq', 'Slack Impact', 'Slack Freq'];
+            $scope.overallWeekSeries1 = "Course";
+            $scope.overallWeekSeries2 = "Team";
+            $scope.overallWeekSeries3 = "Student";
+            $scope.overallWeekData = [
                 [$scope.courseWeightTG1, $scope.courseFrequencyTG1, $scope.courseWeightGH1, $scope.courseFrequencyGH1, $scope.courseWeightSK1, $scope.courseFrequencySK1],
                 [$scope.teamWeightTG1, $scope.teamFrequencyTG1, $scope.teamWeightGH1, $scope.teamFrequencyGH1, $scope.teamWeightSK1, $scope.teamFrequencySK1],
                 [$scope.studentWeightTG1, $scope.studentFrequencyTG1, $scope.studentWeightGH1, $scope.studentFrequencyGH1, $scope.studentWeightSK1, $scope.studentFrequencySK1]
             ];
 
-            getTaigaActivity();
+            var totalOverallCtx = $("#radarOverall").get(0).getContext("2d");
+            $scope.totalOverallChart = new Chart(totalOverallCtx, {
+                type: 'radar',
+                data: {
+                    labels: $scope.overallWeekLabels,
+                    datasets: [{
+                        fill: 'origin',
+                        backgroundColor:'rgb(228, 98, 98, .25)',
+                        borderColor: 'rgb(228, 98, 98)',
+                        borderWidth: 2,
+                        label: $scope.overallWeekSeries1,
+                        data: $scope.overallWeekData[0],
+                        pointRadius: 3,
+                        pointBorderWidth: 2,
+                        pointBackgroundColor: 'rgb(228, 98, 98, .25)',
+                        pointBorderColor: 'rgb(228, 98, 98)',
+                        pointHoverRadius: 6
+                    },
+                        {
+                            fill: 'origin',
+                            backgroundColor:'rgb(42, 137, 232, .25)',
+                            borderColor: 'rgb(42, 137, 232)',
+                            borderWidth: 2,
+                            label: $scope.overallWeekSeries2,
+                            data: $scope.overallWeekData[1],
+                            pointRadius: 3,
+                            pointBorderWidth: 2,
+                            pointBackgroundColor: 'rgb(42, 137, 232, .25)',
+                            pointBorderColor: 'rgb(42, 137, 232)',
+                            pointHoverRadius: 6
+                        },
+                        {
+                            fill: 'origin',
+                            backgroundColor:'rgb(68, 202, 135, .25)',
+                            borderColor: 'rgb(68, 202, 135)',
+                            borderWidth: 2,
+                            label: $scope.overallWeekSeries3,
+                            data: $scope.overallWeekData[2],
+                            pointRadius: 3,
+                            pointBorderWidth: 2,
+                            pointBackgroundColor: 'rgb(68, 202, 135, .25)',
+                            pointBorderColor: 'rgb(68, 202, 135)',
+                            pointHoverRadius: 6
+                        }]
+                },
+                options: {
+                    responsive: false,
+                    maintainAspectRatio: true,
+                    legend: {
+                        display: true
+                    },
+                    scale: {
+                        ticks: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: 3,
+                            stepSize: .5
+                        },
+                        pointLabels: {
+                            fontSize: 14
+                        }
+                    }
+                }
+            });
         }
         function getTaigaActivity() {
             $scope.taigaMaxY = 0;
@@ -3063,12 +3578,10 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                 //console.log("Worked!");
                 //console.log(response.data);
                 $scope.studentActivity = response.data;
-                getGithubIntervals();
                 $scope.dataForTaigaStudentActivity =  getDataForStudentTaigaActivityCharts(response.data);
             }, function (response) {
                 //fail case
                 console.log("Didn't Work");
-                getGithubIntervals();
 
             });
         }
@@ -3178,7 +3691,6 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                     });
                     $scope.IntervalChangedEnd($rootScope.rawWeekEnding);
                 }
-                getGitHubWeightData();
             }, function (response) {
                 //fail case
                 console.log("Didn't Work");
@@ -3199,7 +3711,8 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                 getAllStudentTabsData();
             }
         }
-                function getAllStudentTabsData(){
+            function getAllStudentTabsData(){
+                getTaigaCourseWeightFreq();
                 $http({
                     url: './taiga/student_tasks',
                     method: "GET",
