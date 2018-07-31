@@ -211,7 +211,7 @@ public class GitHubCommitQueryDao implements IGitHubCommitQueryDao {
     @Override
     @Transactional
     public List<WeeklyIntervals> getWeeklyIntervalsByCourse(String course) throws DataAccessException {
-        Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, UNIX_TIMESTAMP(weekBeginning) AS rawWeekBeginning, UNIX_TIMESTAMP(weekEnding) AS rawWeekEnding FROM (SELECT DATE(date) as 'weekBeginning', DATE(date + INTERVAL (DAYOFWEEK(date) - 1) DAY) as 'weekEnding' FROM cassess.commit_data WHERE course = ?1 group by week(date)) w1, (select @rn \\:= 0) vars", WeeklyIntervals.class);
+        Query query = getEntityManager().createNativeQuery("SELECT (@rn \\:= @rn + 1) as 'week', weekBeginning, weekEnding, UNIX_TIMESTAMP(weekBeginning) AS rawWeekBeginning, UNIX_TIMESTAMP(weekEnding) AS rawWeekEnding FROM (SELECT DATE(date) as 'weekBeginning', DATE(date + INTERVAL (DAYOFWEEK(date) - 1) DAY) as 'weekEnding' FROM cassess.commit_data WHERE course = ?1 group by week(date) order by weekBeginning) w1, (select @rn \\:= 0) vars", WeeklyIntervals.class);
         query.setParameter(1, course);
         List<WeeklyIntervals> resultList = query.getResultList();
         return resultList;

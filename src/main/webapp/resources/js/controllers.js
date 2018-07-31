@@ -50,6 +50,8 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
             $scope.selectedCourseChanged = function () {
                 $scope.course = $scope.adminCourse.value.course;
                 adminService.setCourse($scope.adminCourse.value.course);
+                $rootScope.rawWeekBeginning = null;
+                $rootScope.rawWeekEnding = null;
                 $http({
                     url: './course_students',
                     method: "GET",
@@ -90,7 +92,7 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                 $location.path('/studentProfile/' + email);
         }
     }])
-    .controller('StudentProfileController', ['$scope', '$location', '$routeParams', '$http', 'userService', '$window', 'adminService', function ($scope, $location, $routeParams, $http, userService, $window, adminService) {
+    .controller('StudentProfileController', ['$scope', '$rootScope','$location', '$routeParams', '$http', 'userService', '$window', 'adminService', function ($scope, $rootScope, $location, $routeParams, $http, userService, $window, adminService) {
         $scope.userid = $routeParams.user_id;
 
         $http({
@@ -149,6 +151,8 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
 
         $scope.selectedCourseChanged = function () {
+            $rootScope.rawWeekBeginning = null;
+            $rootScope.rawWeekEnding = null;
             $http({
                 url: './student_teams',
                 method: "GET",
@@ -541,7 +545,7 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
     }])
 
-    .controller('AdminProfileController', ['$scope', '$location', '$routeParams', '$http', 'userService', '$window', function ($scope, $location, $routeParams, $http, userService, $window) {
+    .controller('AdminProfileController', ['$scope', '$rootScope', '$location', '$routeParams', '$http', 'userService', '$window', function ($scope, $rootScope, $location, $routeParams, $http, userService, $window) {
         $scope.userid = $routeParams.user_id;
 
         $http({
@@ -599,6 +603,8 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
         $scope.selectedCourseChanged = function () {
             $scope.course = $scope.adminCourse.value.course;
+            $rootScope.rawWeekBeginning = null;
+            $rootScope.rawWeekEnding = null;
         };
 
         $scope.adminCourseRemove = function () {
@@ -748,8 +754,8 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
         }
 
     })
-    .controller('NavController', ['$scope', '$location', '$http', 'courseService', 'teamService', 'studentService', '$window', '$routeParams', 'userService',
-        function ($scope, $location, $http, courseService, teamService, studentService, $window, $routeParams, userService) {
+    .controller('NavController', ['$scope', '$rootScope','$location', '$http', 'courseService', 'teamService', 'studentService', '$window', '$routeParams', 'userService',
+        function ($scope, $rootScope, $location, $http, courseService, teamService, studentService, $window, $routeParams, userService) {
 
             $http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded; charset=utf-8";
 
@@ -804,6 +810,8 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
             $scope.selectedCourseChanged = function (course) {
                 if (userService.getAuth() == 'super_user') {
                     courseService.setCourse(course);
+                    $rootScope.rawWeekBeginning = null;
+                    $rootScope.rawWeekEnding = null;
                     $http({
                         url: './course_teams',
                         method: "GET",
@@ -2509,6 +2517,7 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
             commitOptions();
             getGitHubWeightData();
+            listGetDetailedGithubActivityURL();
         }
 
         function getGitHubBarChartMax(gitHubBarChartMax){
@@ -2572,7 +2581,7 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                             console.log('$scope.githubStartDate '+$scope.githubStartDate);
                             //listGetDetailedGithubActivityURL($scope.githubStartDate,$scope.githubEndDate);
                             listGetDetailedGithubActivityURL();
-                            getGitHubWeightStudentData($scope.githubStartDate,$scope.githubEndDate);
+                            //getGitHubWeightStudentData($scope.githubStartDate,$scope.githubEndDate);
                         });
                     }
                 }
@@ -2607,8 +2616,8 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
              * Temporarily commenting out the sub-charts for GitHub data  from the AutoGrader Tool
              * TODO: Re-implement sub-charting data below following Taiga AG integration and getting both AG tools on server
              */
-            //$scope.dataForGitHubTeamTotals =  getDataForGitHubTeamCommitsSubCharts(array);
-            //commitTotals();
+            $scope.dataForGitHubTeamTotals =  getDataForGitHubTeamCommitsSubCharts(array);
+            commitTotals();
         }
 
         function commitTotals() {
@@ -2667,11 +2676,8 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
 
                 var valueset1 = [];var valueset2 = [];var valueset3 = [];var valueset4 = [];
 
-                if(array[i].name!=null){
-                    student_name =  array[i].name;
-                }
-                else {
-                    student_name = array[i].userid;
+                if(array[i].name!=null) {
+                    student_name = array[i].name;
                 }
                 valueset1.push(student_name);
                 valueset1.push(array[i].total_activity.commits);

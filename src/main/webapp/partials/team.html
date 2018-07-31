@@ -79,10 +79,11 @@
                             <nvd3 options='optionsForGitHubTeamCommits' data='dataForGitHubTeamCommits'></nvd3>
                         </div>
                             <!-- Temporarily commenting out Autograder sourced chart -->
-                            <!--
-                            <nvd3 options='optionsForGitHubTeamTotals' data='dataForGitHubTeamTotals'></nvd3>
+                        Click here to view Autograding Helper Chart: <input type="checkbox" id="githubChart3" ng-model="ModelData.githubChart3" />
+                        <div ng-show="ModelData.githubChart3">
+                        <nvd3 options='optionsForGitHubTeamTotals' data='dataForGitHubTeamTotals'></nvd3>
+                        </div>
                             <br>
-                            -->
                         <div id="githubChart2" ng-controller="TeamController">
                             <h3>GitHub Team Average Weight Activity</h3><br>
                              <nvd3 options='optionsForGitHubTeamWeight' data='dataForGitHubTeamWeight'></nvd3>
