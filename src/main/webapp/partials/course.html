@@ -45,13 +45,13 @@
                         <br>
                         <br>
                         <h3>Overall Averages For: {{SelectedWeekBeginning.weekBeginning}}  To  {{SelectedWeekEnding.weekEnding}}</h3><br>
-                        <div id="selectedOverall" ng-controller="CourseController">
-                            <canvas id="radarSelected" class="chart" style="width:450px; height:400px;"></canvas>
+                        <div id="selectedOverall" ng-controller="CourseController" style="width:37.5em !important; height:33.333em !important;">
+                            <canvas id="radarSelected" class="chart" style="width:100%; height:100%"></canvas>
                         </div>
                         <br>
                         <h3>Semester Overall Averages</h3><br>
-                        <div id="totalOverall" ng-controller="CourseController">
-                            <canvas id="radarOverall" class="chart" style="width:450px; height:400px;"></canvas>
+                        <div id="totalOverall" ng-controller="CourseController" style="width:37.5em !important; height:33.333em !important;">
+                            <canvas id="radarOverall" class="chart" style="width:100%; height:100%"></canvas>
                         </div>
                     </div>
                     <div ng-if="isSet(2)">

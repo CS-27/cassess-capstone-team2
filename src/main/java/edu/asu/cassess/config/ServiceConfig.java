@@ -10,9 +10,7 @@ import java.util.Properties;
 @ComponentScan("edu.asu.cassess.service")
 public class ServiceConfig {
     private static String AG_URL = "";
-
     public static String getAG_URL() {
-        System.out.println("[LOG] AG_URL "+AG_URL);
         return AG_URL;
     }
     static {
@@ -20,7 +18,6 @@ public class ServiceConfig {
             Properties dbProperties = new Properties();
             dbProperties.load(ServiceConfig.class.getClassLoader().getResourceAsStream("/autograder.properties"));
             AG_URL = dbProperties.getProperty("ag_url");
-
         } catch (Throwable t) {
             t.printStackTrace();
         } finally {

@@ -1,5 +1,6 @@
 package edu.asu.cassess.web.controller;
 
+import edu.asu.cassess.config.ServiceConfig;
 import edu.asu.cassess.dao.github.IGitHubCommitDataDao;
 import edu.asu.cassess.dao.github.IGitHubCommitQueryDao;
 import edu.asu.cassess.dao.github.IGitHubWeightDao;

@@ -148,8 +148,6 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
             });
         }
 
-
-
         $scope.selectedCourseChanged = function () {
             $rootScope.rawWeekBeginning = null;
             $rootScope.rawWeekEnding = null;
@@ -998,7 +996,6 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                 getGitHubWeightFreq();
             });
         }
-
         function getGitHubWeightFreq() {
             $http({
                 url: './github/course_weightFreq',
@@ -1087,8 +1084,8 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                         }]
                     },
                     options: {
-                        responsive: false,
-                        maintainAspectRatio: true,
+                        responsive: true,
+                        maintainAspectRatio: false,
                         legend: {
                             display: true
                         },
@@ -1110,7 +1107,7 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
             } else {
                 //console.log("Not Initial Run for Selected Chart");
                 $('#radarSelected').remove();
-                $('#selectedOverall').append('<canvas id="radarSelected" class="chart" style="width:450px; height:400px;"></canvas>');
+                $('#selectedOverall').append('<canvas id="radarSelected" class="chart" style="width:100%; height:100%"></canvas>');
                 var selectedOverallCtx = $("#radarSelected").get(0).getContext("2d");
                 $scope.selectedOverallChart = new Chart(selectedOverallCtx, {
                     type: 'radar',
@@ -1131,8 +1128,8 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                         }]
                     },
                     options: {
-                        responsive: false,
-                        maintainAspectRatio: true,
+                        responsive: true,
+                        maintainAspectRatio: false,
                         legend: {
                             display: true
                         },
@@ -1200,8 +1197,8 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                     }]
                 },
                 options: {
-                    responsive: false,
-                    maintainAspectRatio: true,
+                    responsive: true,
+                    maintainAspectRatio: false,
                     legend: {
                         display: true
                     },
@@ -2052,8 +2049,8 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                             }]
                     },
                     options: {
-                        responsive: false,
-                        maintainAspectRatio: true,
+                        responsive: true,
+                        maintainAspectRatio: false,
                         legend: {
                             display: true
                         },
@@ -2075,7 +2072,7 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
             } else {
                 //console.log("Not Initial Run for Selected Chart");
                 $('#radarSelected').remove();
-                $('#selectedOverall').append('<canvas id="radarSelected" class="chart" style="width:450px; height:400px;"></canvas>');
+                $('#selectedOverall').append('<canvas id="radarSelected" class="chart" style="width:100%; height:100%"></canvas>');
                 var selectedOverallCtx = $("#radarSelected").get(0).getContext("2d");
                 $scope.selectedOverallChart = new Chart(selectedOverallCtx, {
                     type: 'radar',
@@ -2110,8 +2107,8 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                             }]
                     },
                     options: {
-                        responsive: false,
-                        maintainAspectRatio: true,
+                        responsive: true,
+                        maintainAspectRatio: false,
                         legend: {
                             display: true
                         },
@@ -2219,8 +2216,8 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                         }]
                 },
                 options: {
-                    responsive: false,
-                    maintainAspectRatio: true,
+                    responsive: true,
+                    maintainAspectRatio: false,
                     legend: {
                         display: true
                     },
@@ -3378,8 +3375,8 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                             }]
                     },
                     options: {
-                        responsive: false,
-                        maintainAspectRatio: true,
+                        responsive: true,
+                        maintainAspectRatio: false,
                         legend: {
                             display: true
                         },
@@ -3401,7 +3398,7 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
             } else {
                 //console.log("Not Initial Run for Selected Chart");
                 $('#radarSelected').remove();
-                $('#selectedOverall').append('<canvas id="radarSelected" class="chart" style="width:450px; height:400px;"></canvas>');
+                $('#selectedOverall').append('<canvas id="radarSelected" class="chart" style="width:100%; height:100%"></canvas>');
                 var selectedOverallCtx = $("#radarSelected").get(0).getContext("2d");
                 $scope.selectedOverallChart = new Chart(selectedOverallCtx, {
                     type: 'radar',
@@ -3448,8 +3445,8 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                             }]
                     },
                     options: {
-                        responsive: false,
-                        maintainAspectRatio: true,
+                        responsive: true,
+                        maintainAspectRatio: false,
                         legend: {
                             display: true
                         },
@@ -3591,8 +3588,8 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
                     }]
                 },
                 options: {
-                    responsive: false,
-                    maintainAspectRatio: true,
+                    responsive: true,
+                    maintainAspectRatio: false,
                     legend: {
                         display: true
                     },

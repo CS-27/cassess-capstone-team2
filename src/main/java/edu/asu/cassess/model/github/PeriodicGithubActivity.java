@@ -34,9 +34,8 @@ public PeriodicGithubActivity(String github_token, String github_owner, String g
 	}
 
 	public void setGithub_activity_URL(String github_token,String github_owner,String github_repo_id,String github_username) {
-		this.github_activity_URL = ServiceConfig.getAG_URL() + "?token="+github_token
+		this.github_activity_URL = ServiceConfig.getAG_URL() + "github-stats?token="+github_token
 				+"&owner="+github_owner+"&repo="+github_repo_id+"&userids="+github_username;
-		System.out.println("[LOG] AG URL: "+this.github_activity_URL);
 	}
 
 	public void setGithub_owner(String github_owner) {
