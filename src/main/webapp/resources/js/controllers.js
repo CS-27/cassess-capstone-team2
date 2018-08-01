@@ -956,6 +956,17 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
         //console.log("course: " + $scope.courseid);
         var initial = true;
 
+        $http({
+            url: './ag_url',
+            method: "GET"
+        }).then(function (response) {
+            $scope.autograder_url = response.data;
+            //console.log($scope.autograder_url);
+        }, function (response) {
+            //fail case
+            console.log("didn't work: " + response.data);
+        });
+
         $scope.commitMaxY = 0;
 
         $http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded; charset=utf-8";
@@ -1820,6 +1831,17 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
         if ($scope.teamid == null) {
             $scope.teamid = "none";
         }
+
+        $http({
+            url: './ag_url',
+            method: "GET"
+        }).then(function (response) {
+            $scope.autograder_url = response.data;
+            //console.log($scope.autograder_url);
+        }, function (response) {
+            //fail case
+            console.log("didn't work: " + response.data);
+        });
 
         $scope.commitMaxY = 0;
 
@@ -3058,6 +3080,17 @@ myapp.controller('LoginController', function ($rootScope, $scope, AuthSharedServ
             studentemail = "none";
             //console.log("studentemail: " + studentemail);
         }
+
+        $http({
+            url: './ag_url',
+            method: "GET"
+        }).then(function (response) {
+            $scope.autograder_url = response.data;
+            //console.log($scope.autograder_url);
+        }, function (response) {
+            //fail case
+            console.log("didn't work: " + response.data);
+        });
 
         $scope.commitMaxY = 0;
 

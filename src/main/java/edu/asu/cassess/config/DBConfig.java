@@ -39,16 +39,16 @@ public class DBConfig {
         dataSource.setUrl("jdbc:mysql://localhost/cassess");
         dataSource.setUsername("root");
         dataSource.setPassword("root123");
-*/
+
         //Connection Parameters for ASU RHEL Server Deployment
         dataSource.setUrl("jdbc:mysql://localhost/cassess");
         dataSource.setUsername("root");
         dataSource.setPassword("root123");
-/*
+*/
         dataSource.setUrl("jdbc:mysql://cassess.fulton.asu.edu/cassess");
         dataSource.setUsername("cassess");
         dataSource.setPassword("4qHb!9d3");
-*/
+
         return dataSource;
     }
 
